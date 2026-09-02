@@ -23,3 +23,10 @@ venv/、runtime/、data/（open-webui 库/用户数据/ollama 模型）、log/�
 - 4 个含中文目录调用的 bat（启动.bat/关闭.bat/一键启动全部.bat/一键关闭全部.bat 及文字驱动语音\启动.bat）= **GBK + chcp936**（与原件一致，中文 Windows 正常运行；勿转 UTF-8、勿去 chcp，否则找不到中文目录）。其余 bat 纯 ASCII+CRLF+无 BOM。
 - 三子项目 README 均注明模型/引擎/素材按根 DEPLOY.md 准备。
 - 提交 `git push origin main`；中文文档 UTF-8。
+---
+### 关键点（2026-09-02 上传整理补充）
+- 知音 ZhiYin 四合一：8088 Open WebUI / 11434 Ollama / 48620 自研数字人(avatar_server.py 纯标准库) / 8061 GPT-SoVITS 朗读(tts_service/tts_api.py)
+- 4 个含中文目录调用的 bat（启动/关闭/一键启动全部/一键关闭全部）= GBK + chcp936，勿转 UTF-8、勿去 chcp（否则找不到中文目录）
+- _scan_login.py / _auth_dom.html（登录页探测）一律弃传；loader.js 个人域名已改可配置(window.__DSH_AVATAR_REMOTE__，默认本机)
+- 大件装配全在 DEPLOY.md：Ollama 便携+模型(qwen2.5:7b/bge-m3)、open-webui(pip)、GPT-SoVITS 引擎、whisper(scripts\download_whisper.py)、ffmpeg
+- data/sessions/log/真人素材/人格档案 不入库；与 yumingbushu 同级目录放置可发布公网
