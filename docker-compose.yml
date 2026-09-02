@@ -1,0 +1,92 @@
+# ============================================================
+#  RAG 知识库（Ollama + Open WebUI）— 可选 Docker 部署方式
+#  主用部署方式为原生（venv + Ollama 安装版），见 DEPLOY.md；
+#  本文件保留作 Docker 备选方案（仅对话系统两个服务）。
+#  使用：docker compose up -d；端口：Open WebUI 8080(容器) / Ollama 11434
+# ============================================================
+
+services:
+
+  ollama:
+    image: ollama/ollama:latest
+    container_name: ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      # 模型存储 — 迁移时模型跟数据一起带走
+      - ./data/ollama:/root/.ollama
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=all
+      - OLLAMA_KEEP_ALIVE=24h
+      - OLLAMA_HOST=0.0.0.0
+      # 单并发：显存紧张环境（系统程序 + TTS 占显存）下更稳；
+      # NUM_PARALLEL>1 会按并发数预留 KV 显存，反而挤占模型空间
+      - OLLAMA_NUM_PARALLEL=1
+      - OLLAMA_FLASH_ATTENTION=true
+      # 显存预留 1024MB：给 TTS/系统程序留足空间，避免 qwen KV 被压缩导致变慢
+      - OLLAMA_GPU_OVERHEAD=1024
+      - OLLAMA_LOAD_TIMEOUT=30m
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    restart: "unless-stopped"
+    networks:
+      - digital-human-net
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "100m"
+        max-file: "3"
+
+  open-webui:
+    image: ghcr.io/open-webui/open-webui:main
+    container_name: open-webui
+    ports:
+      # 2026-08-16: 3000 曾被 Windows/WSL2 动态端口排除范围(2969-3068)占用导致
+      # 启动失败，改用 8080（避开常见排除段）；如仍冲突可再改，如 8081
+      - "8080:8080"
+    volumes:
+      # Open WebUI 数据库和配置
+      - ./data/open-webui:/app/backend/data
+      # 浏览器兼容性 polyfill（Edge 92 等老浏览器）
+      - ./loader.js:/app/build/static/loader.js:ro
+    environment:
+      - OLLAMA_BASE_URL=http://ollama:11434
+      # OpenAI 兼容端点指向本地 Ollama，避免离线环境卡在 api.openai.com 超时
+      - OPENAI_API_BASE_URL=http://ollama:11434/v1
+      - OPENAI_API_KEY='ollama'
+      - WEBUI_AUTH=True
+      - WEBUI_NAME=ZhiYin
+      # 离线模式：禁止联网检查/下载，模型全从本地缓存加载
+      - OFFLINE_MODE=true
+      - HF_HUB_OFFLINE=1
+      - TRANSFORMERS_OFFLINE=1
+      # RAG 嵌入模型使用本地已缓存的 bge-m3
+      - RAG_EMBEDDING_ENGINE=ollama
+      - RAG_EMBEDDING_MODEL=bge-m3
+      - RAG_EMBEDDING_MODEL_EMBEDDING_DIMENSION=1024
+      # 语音识别强制中文，防止把中文误识别成日语
+      - WHISPER_LANGUAGE=zh
+      # Whisper 模型：small 已预下载到本地缓存，断网可用
+      - WHISPER_MODEL=small
+    restart: "unless-stopped"
+    depends_on:
+      - ollama
+    networks:
+      - digital-human-net
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "100m"
+        max-file: "3"
+
+# 容器通过自定义 bridge 网络 digital-human-net 互访（服务名 = 容器名）。
+# 如需让其他 Docker 服务按容器名访问本服务的 ollama / open-webui，加入同一网络即可。
+networks:
+  digital-human-net:
+    driver: bridge
+    name: digital-human-net

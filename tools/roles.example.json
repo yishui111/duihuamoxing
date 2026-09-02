@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "updated_at": "2026-08-19",
+  "说明": "角色注册表模板：每个角色（音色/数字人）绑定自己独立的人格档案，一一对应，禁止共用。status: pending=待蒸馏 | built=已生成 | skeleton=仅骨架(缺材料)。复制本文件为 tools/roles.json 后按需增删角色；material_files 请填本地路径（个人材料勿提交仓库）。",
+  "roles": {
+    "azhong": {
+      "display_name": "阿中（示例角色）",
+      "persona_file": "docs/人格档案/azhong.md",
+      "voice_model": "azhong",
+      "avatar_lib": "",
+      "chat_model": "qwen2.5:7b",
+      "material_files": [],
+      "status": "skeleton",
+      "note": "示例：提供该角色的聊天记录/性格材料后，运行 persona_builder.py --role azhong --chat <材料> 蒸馏"
+    }
+  }
+}
