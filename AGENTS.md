@@ -37,4 +37,4 @@ venv/、runtime/、data/（open-webui 库/用户数据/ollama 模型）、log/�
 - 敏感且需自备（已 gitignore）：yumingbushu\cloudflared\cloudflared.exe + tunnel-token.txt、login_gateway\config.json、login_gateway\.secret、backup\
 - cloudflared Windows 服务 BINARY_PATH 仍指旧位置 D:\xm\yumingbushu：删旧目录前先以管理员运行 yumingbushu\reinstall_cloudflared_service.bat 重注册；start_cloudflared_2.bat 已加"服务启动失败→本目录前台运行"回退
 - silent_start_local.bat 已固定 Open WebUI 工作目录到项目根（否则会生成第二把 .webui_secret_key，重启后登录态全失效）并补齐 OLLAMA_MODELS 等环境变量
-- 8090 端口与用户另一项目 chat_workbench.py 冲突：跑运维面板前先关它
+- 8290 端口与用户另一项目 chat_workbench.py 冲突：跑运维面板前先关它

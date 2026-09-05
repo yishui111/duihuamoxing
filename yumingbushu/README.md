@@ -28,8 +28,8 @@
 
 ## 🎯 主要功能
 
-- 🔐 **自研登录网关**（`login_gateway/`，127.0.0.1:8091）：自绘登录页 + HMAC 签名会话 Cookie，登录后才转发 HTTP / WebSocket 到 Open WebUI（8088）；凭据只来自 `config.json`（不入库），缺配置即报错拒绝启动，**绝无内置默认口令**
-- 🖥️ **自研运维面板**（`ops_dashboard/`，127.0.0.1:8090）：状态卡片（对话/Ollama/数字人/TTS + 隧道）、GPU 显存与磁盘进度条、进程内存列表、8 个日志在线查看、一键生成诊断包
+- 🔐 **自研登录网关**（`login_gateway/`，127.0.0.1:8291）：自绘登录页 + HMAC 签名会话 Cookie，登录后才转发 HTTP / WebSocket 到 Open WebUI（8088）；凭据只来自 `config.json`（不入库），缺配置即报错拒绝启动，**绝无内置默认口令**
+- 🖥️ **自研运维面板**（`ops_dashboard/`，127.0.0.1:8290）：状态卡片（对话/Ollama/数字人/TTS + 隧道）、GPU 显存与磁盘进度条、进程内存列表、8 个日志在线查看、一键生成诊断包
 - 🚇 **Cloudflare Tunnel 集成**：`start_cloudflared_2.bat` / `stop_cloudflared_1.bat` 管理隧道服务，支持开机自启（Windows 服务）
 - ▶️ **成套启停脚本**：`start.bat`/`stop.bat` 总入口 + 分步 `start_local_services_1.bat` → `start_login_gateway.bat` → `start_cloudflared_2.bat`（口诀：**先内容后通道 / 先通道后内容**）
 - 🩺 **健康检查与自动拉起**：`auto_health_check.bat`（配计划任务每 5 分钟体检，Open WebUI 挂了自动拉起）
@@ -141,7 +141,7 @@ cd duihuamoxing    # 工作台在 yumingbushu\ 子目录，随仓库一起到
 | ---- | ---- | ---- |
 | cloudflared.exe（约 52MB） | Cloudflare 隧道连接器 | https://github.com/cloudflare/cloudflared/releases （windows-amd64.exe，改名 `cloudflared.exe` 放入 `cloudflared\`） |
 | 隧道 Token | 连接你账号下的隧道 | Cloudflare 控制台 → Zero Trust → Networks → Tunnels → Configure → 复制 Token → 存入 `cloudflared\tunnel-token.txt` |
-| 兄弟项目 duihuamoxing（几十 GB） | 系统本体：Open WebUI 8088 / Ollama 11434 / 数字人 48620 / TTS 8061 | 另见其仓库/备份介质，按 DEPLOY.md 与 yumingbushu **同级放置** |
+| 系统本体 duihuamoxing（几十 GB 大件） | Open WebUI 8088 / Ollama 11434 / 数字人 48620 / TTS 8061 | 本目录的父目录即是；大件按 duihuamoxing 的 DEPLOY.md 准备 |
 
 ## 🛠️ 本地开发 & 提交
 
@@ -159,7 +159,8 @@ git push origin main
 - **Q：外网 502 / 打不开？** A：先看本机 http://localhost:8088 是否正常（本地服务没起则 502）；再 `sc query cloudflared` 看隧道是否 RUNNING；最后 `collect_logs.bat` 打包日志排查。
 - **Q：start_cloudflared_2.bat 报 cloudflared.exe / token 找不到？** A：按上文「配置」第 2、3 步准备 `cloudflared\cloudflared.exe` 与 `cloudflared\tunnel-token.txt`，它们不入库，新机器要自己放。
 - **Q：登录网关启动报 FATAL config.json？** A：复制 `login_gateway\config.json.example` 为 `login_gateway\config.json` 并填写强密码 —— 网关刻意不允许空密码/默认密码。
-- **Q：脚本报错说找不到 duihuamoxing？** A：把 `duihuamoxing` 放在与本仓库**同一个父目录**下（`..\duihuamoxing`）。
+- **Q：脚本报错说找不到 duihuamoxing / project root？** A：本目录必须位于 `duihuamoxing\yumingbushu\`（父目录即项目根）；整个文件夹被移出项目外就会找不到。
+- **Q：删掉旧的同级 yumingbushu 文件夹前要做什么？** A：先以管理员身份运行一次 `reinstall_cloudflared_service.bat`，把 cloudflared Windows 服务的二进制路径从旧位置重注册到本目录；不重跑也能用（`start_cloudflared_2.bat` 会回退为前台进程运行隧道），但会失去"开机自启"。
 - **Q：电脑重启后？** A：隧道是 Windows 服务（Automatic）会自动恢复；本地服务可由计划任务（ZhiYinHealthCheck）几分钟内自动拉起，详见 DEPLOY.md。
 
 ## ⚠️ 注意事项

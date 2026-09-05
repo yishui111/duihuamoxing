@@ -1,16 +1,16 @@
 
 ## 🚀 换电脑部署（保证可用）
 
-> **方式 A（推荐 · 100% 保证）**：用 U 盘 / 网盘把「原项目整份文件夹」（含全部大件）复制到新电脑 → 双击 `start.bat` 即可。
+> **方式 A（推荐 · 100% 保证）**：用 U 盘 / 网盘把「duihuamoxing 整份文件夹」（含全部大件，本目录随之一起）复制到新电脑 → 双击根目录 `公网上线.bat` 即可。
 >
-> **方式 B（代码装配）**：`git clone` 本仓库 → 双击 `assemble.bat` 预检大件 → 按提示补齐缺失项（下载地址见下文/README）→ 双击 `start.bat`。
+> **方式 B（代码装配）**：`git clone` duihuamoxing 仓库 → 双击本目录 `assemble.bat` 预检大件 → 按提示补齐缺失项（下载地址见下文/README）→ 双击根目录 `公网上线.bat`。
 
-> 说明：引擎、模型、镜像、运行时等大件体积超过 GitHub 单文件 100MB 上限，**不随仓库分发**；本仓库承载全部自研代码与装配指引，"方式 A"是换机部署最稳路径，"方式 B"适合需要重新下载大件的场景。
+> 说明：引擎、模型、镜像、运行时等大件体积超过 GitHub 单文件 100MB 上限，**不随仓库分发**；仓库承载全部自研代码与装配指引，"方式 A"是换机部署最稳路径，"方式 B"适合需要重新下载大件的场景。
 # 知音（ZhiYin）· 部署方案（DEPLOY）
 
-> 目标：在一台**新电脑**上，用本仓库把「知音」内容系统（duihuamoxing）通过
+> 目标：在一台**新电脑**上，用本目录把「知音」内容系统（duihuamoxing，即本目录的父目录）通过
 > Cloudflare Tunnel 发布到公网 **https://nas.905283.xyz** —— 无公网 IP、无端口映射。
-> 本仓库只含源码/脚本/文档；运行期大件与敏感文件按下文准备。
+> 本目录只含源码/脚本/文档；运行期大件与敏感文件按下文准备。
 
 ## 0. 架构总览
 
@@ -45,19 +45,18 @@ Open WebUI「知音」:8088            （内容系统，duihuamoxing）
 | 磁盘 | 内容系统约 30GB+，建议 SSD |
 | 内存 / 显卡 | 由 duihuamoxing 决定（16GB 能跑，32GB + NVIDIA 独显 8GB 更流畅） |
 | 网络 | 能上外网即可（**无需公网 IP**）；上行越高外网越快 |
-| 兄弟项目 | **duihuamoxing**：含 venv Python、Open WebUI 8088、Ollama 11434、数字人 48620、TTS 8061（其 venv 同时供本仓库网关/面板复用） |
+| 父目录项目 | **duihuamoxing**（本目录所在的项目根）：含 venv Python、Open WebUI 8088、Ollama 11434、数字人 48620、TTS 8061（其 venv 同时供本目录网关/面板复用） |
 | cloudflared | 官方二进制（约 52MB），见第 3 步 |
 
 ## 2. 获取代码并放置
 
-1. 拉取本仓库：`git clone https://github.com/yishui111/yumingbushu.git`
-   （不会用 git 就从 GitHub 页面 Code → Download ZIP 解压，效果一样）
-2. **同级放置兄弟项目**（本仓库所有相对路径脚本都依赖这个布局）：
+1. 拉取 duihuamoxing 仓库：`git clone https://github.com/yishui111/duihuamoxing.git`
+   （不会用 git 就从 GitHub 页面 Code → Download ZIP 解压，效果一样；本目录随仓库一起到）
+2. **布局**（本目录所有相对路径脚本都以父目录为项目根）：
 
 ```
-<父目录>\            ← 也可以是任意目录，两文件夹必须在同一父目录下
-├── duihuamoxing\     ← 内容系统（复制自旧机器 / 备份介质，含 data\、venv\）
-└── yumingbushu\      ← 本仓库
+duihuamoxing\          ← 项目根（内容系统，复制自旧机器 / 备份介质，含 data\、venv\）
+└── yumingbushu\       ← 本目录（部署工作台），不要移到项目外
 ```
 
 ## 3. 运行期文件准备（不入库，新机器必做）
@@ -153,18 +152,18 @@ cloudflared service install <tunnel-token.txt 里的内容>
 | 会话密钥 | `login_gateway\.secret`（网关首次运行自动生成，不入库） |
 | 隧道 Token | `cloudflared\tunnel-token.txt`（⚠️ 敏感，不入库） |
 | cloudflared 日志 | Windows 事件查看器 → 应用程序日志（来源 cloudflared） |
-| 诊断包 | `collect_logs.bat` → 仓库根目录 `diag_时间戳.zip`（不入库） |
+| 诊断包 | `collect_logs.bat` → 本目录下 `diag_时间戳.zip`（不入库） |
 
 ## 6. 自动化（健康检查 / 备份 / 自启）
 
-以管理员身份执行（把 `<父目录>` 换成 yumingbushu 实际的父目录路径，例如 `C:\apps`）：
+以管理员身份执行（把 `<项目根>` 换成 duihuamoxing 的实际路径，例如 `D:\xm\duihuamoxing`）：
 
 ```bat
 :: 每 5 分钟体检：Open WebUI 挂了自动拉起（调用 silent_start_local.bat）
-schtasks /Create /TN "ZhiYinHealthCheck" /TR "<父目录>\yumingbushu\auto_health_check.bat" /SC MINUTE /MO 5 /RL HIGHEST /F
+schtasks /Create /TN "ZhiYinHealthCheck" /TR "<项目根>\yumingbushu\auto_health_check.bat" /SC MINUTE /MO 5 /RL HIGHEST /F
 
 :: 每天凌晨 3 点备份 webui.db 到 backup\（保留最新 7 份）
-schtasks /Create /TN "ZhiYinBackup" /TR "<父目录>\yumingbushu\backup_webui.bat" /SC DAILY /ST 03:00 /F
+schtasks /Create /TN "ZhiYinBackup" /TR "<项目根>\yumingbushu\backup_webui.bat" /SC DAILY /ST 03:00 /F
 ```
 
 - 隧道自启：见 3.4（cloudflared 服务 = Automatic）
@@ -189,13 +188,15 @@ schtasks /Create /TN "ZhiYinBackup" /TR "<父目录>\yumingbushu\backup_webui.ba
 | 外网很慢 | Cloudflare 走国际节点，国内直连慢属正常；可自行搜索「Cloudflare 优选 IP」 |
 | 提示 Token 失效 | token 与隧道绑定：重建/更新 `cloudflared\tunnel-token.txt` 后重装服务 |
 | 网关报 FATAL config.json | 未创建网关口令：按 3.3 复制 config.json.example 并填强密码 |
-| 脚本找不到 duihuamoxing | 布局不对：`duihuamoxing` 必须与本仓库同级（同一父目录） |
+| 脚本找不到 duihuamoxing / project root | 布局不对：本目录必须位于 `duihuamoxing\yumingbushu\`（父目录即项目根） |
 | 双击 start 脚本没反应 | 看是否弹了 UAC；确认 `cloudflared\cloudflared.exe` 已就位 |
+| 面板 8290 起不来 | 端口被占：本机若有其它程序（如 chat_workbench.py）占用 8290，先关它再启动面板 |
 
 ## 9. 本机与目标机器可能不同的项
 
-- **路径**：脚本全部用 `%~dp0` / `$PSScriptRoot` 相对定位，两文件夹放哪个父目录都行；
-  但 cloudflared **装成服务后不能移动**（服务绑定绝对路径），要移动就重装一次服务
+- **路径**：脚本全部用 `%~dp0` / `$PSScriptRoot` 相对定位，整个 duihuamoxing 文件夹放哪个路径都行；
+  但 cloudflared **装成服务后不能移动**（服务绑定绝对路径）——换路径后以管理员运行
+  `reinstall_cloudflared_service.bat` 重注册一次即可
 - **端口冲突**：8088 被占用时改 duihuamoxing 启动脚本里的 `--port`，并同步改云端
   隧道映射（见第 10 节）
 - **无 GPU 机器**：TTS 自动降级 CPU（慢但可用），对话不受影响

@@ -2,7 +2,7 @@
 #  RAG 知识库（Ollama + Open WebUI）— 可选 Docker 部署方式
 #  主用部署方式为原生（venv + Ollama 安装版），见 DEPLOY.md；
 #  本文件保留作 Docker 备选方案（仅对话系统两个服务）。
-#  使用：docker compose up -d；端口：Open WebUI 8080(容器) / Ollama 11434
+#  使用：docker compose up -d；端口：Open WebUI 宿主 8293 / 容器 8080 / Ollama 11434
 # ============================================================
 
 services:
@@ -48,7 +48,7 @@ services:
     ports:
       # 2026-08-16: 3000 曾被 Windows/WSL2 动态端口排除范围(2969-3068)占用导致
       # 启动失败，改用 8080（避开常见排除段）；如仍冲突可再改，如 8081
-      - "8080:8080"
+      - "8293:8080"
     volumes:
       # Open WebUI 数据库和配置
       - ./data/open-webui:/app/backend/data
