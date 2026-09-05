@@ -12,7 +12,7 @@ RAG 知识库 - 数字人素材服务（完整版，迁移 light-avatar 原版�
   POST /api/transcode          -> 视频转码（上传原始视频 -> H.264，body 为视频字节）
   GET  /api/input/<路径>        -> 转码后的视频（建库工具播放用）
 素材库目录默认项目内 avatar_libs（LIGHT_AVATAR_LIBS 可覆盖）；
-视频输入目录 avatar_input（本项目内）；监听 127.0.0.1:48620（AVATAR_PORT 可覆盖）。
+视频输入目录 avatar_input（本项目内）；监听 0.0.0.0:48620（AVATAR_PORT 可覆盖）。
 纯 Python 标准库实现，不吃配置（约 20MB 内存，无 GPU）。
 """
 import base64
@@ -23,7 +23,8 @@ import re
 import shutil
 import subprocess
 import time
-from http.server import BaseHTTPRequestHandler, HTTPServer
+import uuid
+from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from logging.handlers import RotatingFileHandler
 from urllib.parse import unquote
 
@@ -110,6 +111,9 @@ def list_libs():
 
 class Handler(BaseHTTPRequestHandler):
     server_version = "avatar-server"
+    # HTTP/1.1 keep-alive：全部响应都带 Content-Length，浏览器可复用连接，
+    # 嘴型帧等大量小图请求省去每次 TCP 握手
+    protocol_version = "HTTP/1.1"
 
     def _cors(self):
         self.send_header("Access-Control-Allow-Origin", "*")
@@ -140,22 +144,43 @@ class Handler(BaseHTTPRequestHandler):
         self.wfile.write(data)
 
     def _file(self, path):
+        """流式发送文件：64KB 分块（大视频不吃整块内存）+ ETag 协商缓存
+        （嘴型帧/manifest 反复加载时命中 304，不再每次全量重传；
+        文件更新后 ETag 变化，浏览器拿到的仍是新内容）。"""
         ext = os.path.splitext(path)[1].lower()
         ct = MIME.get(ext, "application/octet-stream")
         try:
-            with open(path, "rb") as f:
-                data = f.read()
+            st = os.stat(path)
         except OSError:
             self._send_error(404)
+            return
+        etag = '"%d-%d"' % (st.st_mtime_ns, st.st_size)
+        if self.headers.get("If-None-Match", "").strip() == etag:
+            self.send_response(304)
+            self._cors()
+            self.send_header("ETag", etag)
+            self.send_header("Cache-Control", "no-cache")
+            self.end_headers()
             return
         self.send_response(200)
         self._cors()
         self.send_header("Content-Type", ct)
-        self.send_header("Content-Length", str(len(data)))
-        self.send_header("Cache-Control", "no-store")
+        self.send_header("Content-Length", str(st.st_size))
+        self.send_header("ETag", etag)
+        self.send_header("Cache-Control", "no-cache")
         self.end_headers()
-        if self.command != "HEAD":
-            self.wfile.write(data)
+        if self.command == "HEAD":
+            return
+        try:
+            with open(path, "rb") as f:
+                while True:
+                    chunk = f.read(64 * 1024)
+                    if not chunk:
+                        break
+                    self.wfile.write(chunk)
+        except (BrokenPipeError, ConnectionResetError):
+            # 客户端中途断开：连接已不可复用，必须关闭（HTTP/1.1 keep-alive 要求）
+            self.close_connection = True
 
     def do_OPTIONS(self):
         self.send_response(204)
@@ -233,7 +258,8 @@ class Handler(BaseHTTPRequestHandler):
                 if length > 500 * 1024 * 1024:
                     self._json(413, {"error": "too large"})
                     return
-                base = "upload_%d" % int(time.time() * 1000)
+                # 毫秒时间戳 + 随机后缀：多线程下两路上传同毫秒也不会互相覆盖
+                base = "upload_%d_%s" % (int(time.time() * 1000), uuid.uuid4().hex[:8])
                 os.makedirs(INPUT_DIR, exist_ok=True)
                 src = os.path.join(INPUT_DIR, base + ".mp4")
                 with open(src, "wb") as f:
@@ -360,4 +386,7 @@ class Handler(BaseHTTPRequestHandler):
 
 if __name__ == "__main__":
     print("avatar-server: port=%s libs=%s web=%s" % (PORT, LIBS, WEB_DIR), flush=True)
-    HTTPServer(("0.0.0.0", PORT), Handler).serve_forever()
+    # 多线程：转码/大文件传输不再阻塞嘴型帧等并发请求
+    server = ThreadingHTTPServer(("0.0.0.0", PORT), Handler)
+    server.daemon_threads = True
+    server.serve_forever()

@@ -910,6 +910,16 @@ window.__dsh_wrapFetch = (function () {
         for (var i = 0; i < frames.length; i++) { if (frames[i].slot === 0) { first = frames[i]; break; } }
         if (!first) first = frames[0];
         if (first) setFrame(first.file);
+        // 预取全部嘴型帧进浏览器缓存：说话时切换口型不再现场下载（去重后逐个触发）
+        var seen = {};
+        for (var k = 0; k < frames.length; k++) {
+          var f = frames[k] && frames[k].file;
+          if (f && !seen[f]) {
+            seen[f] = 1;
+            var pi = new Image();
+            pi.src = AVATAR_SERVER + "/api/lib/" + libName + "/" + f;
+          }
+        }
       })
       .catch(function () {
         // 库不存在（已删除/失效）：自动切回内置测试数字人，并清掉失效配置，避免反复请求
@@ -997,12 +1007,12 @@ window.__dsh_wrapFetch = (function () {
   function energyAt(t) {
     if (!energyCurve || !energyCurve.length) return 0;
     var lo = 0.025, hi = 0.4;
-    var best = 0, bd = 1e9;
-    for (var i = 0; i < energyCurve.length; i++) {
-      var d = Math.abs(energyCurve[i].t - t);
-      if (d < bd) { bd = d; best = i; }
-    }
-    var rms = energyCurve[best].level;
+    // 能量曲线时间轴均匀（第 i 个点 t = i*0.05），直接算索引，
+    // 不必每帧线性扫描（动画 60fps 下原来的 O(n) 查找白白耗 CPU）
+    var i = Math.round(t / 0.05);
+    if (i < 0) i = 0;
+    else if (i >= energyCurve.length) i = energyCurve.length - 1;
+    var rms = energyCurve[i].level;
     return rms < lo ? 0 : rms > hi ? 1 : (rms - lo) / (hi - lo);
   }
 
@@ -1997,14 +2007,15 @@ window.__dsh_wrapFetch = (function () {
   }
 
   // ============ 登录区分主流程 ============
+  // 角色确定后立即停止轮询（admin 不会建本页面，原实现会对 admin 每 2 秒
+  // 打一次 /api/v1/auths/ 永不停止；退出登录走 location.reload，重载后重新检测）
   var timer = setInterval(function () {
     if (!localStorage.getItem("token")) return;
     if (document.getElementById("dsh-user-page")) { clearInterval(timer); return; }
     api("/api/v1/auths/").then(function (r) { return r.json(); }).then(function (u) {
-      if (u && u.role && u.role !== "admin") {
-        build();
-        clearInterval(timer);
-      }
+      if (!u || !u.role) return;  // 未取到角色（接口异常/正在登录）：继续等
+      if (u.role !== "admin") build();
+      clearInterval(timer);
     }).catch(function () {});
   }, 2000);
 })();
@@ -2045,7 +2056,10 @@ window.__dsh_wrapFetch = (function () {
     fetch("/api/v1/auths/", { headers: { "Authorization": "Bearer " + localStorage.getItem("token") } })
       .then(function (r) { return r.json(); })
       .then(function (u) {
-        if (u && u.role === "admin") { showBtn(); clearInterval(timer); }
+        // 角色确定后停止轮询：admin 显示按钮；非 admin 本按钮不显示，
+        // 原实现会对非 admin 每 2 秒查询一次永不停止
+        if (u && u.role === "admin") { showBtn(); }
+        if (u && u.role) clearInterval(timer);
       }).catch(function () {});
   }, 2000);
 })();

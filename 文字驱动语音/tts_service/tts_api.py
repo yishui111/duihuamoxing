@@ -24,9 +24,11 @@ import logging
 import os
 import re
 import shutil
+import subprocess
 import sys
 import tempfile
 import threading
+import time
 import uuid
 
 import numpy as np
@@ -292,9 +294,7 @@ def _trim_edges(audio, sr, threshold=0.006, pad=0.08):
     n = (len(audio) - frame) // frame
     if n <= 0:
         return audio
-    rms = np.sqrt(np.array([
-        float(np.mean(audio[i * frame:(i + 1) * frame] ** 2)) for i in range(n)
-    ]))
+    rms = np.sqrt((audio[:n * frame].reshape(n, frame) ** 2).mean(axis=1))
     active = np.where(rms > threshold)[0]
     if len(active) == 0:
         return audio
@@ -302,6 +302,24 @@ def _trim_edges(audio, sr, threshold=0.006, pad=0.08):
     start = max(0, active[0] * frame - pad_s)
     end = min(len(audio), (active[-1] + 1) * frame + pad_s)
     return audio[start:end]
+
+
+def _cleanup_tmp_wavs(max_age_seconds=3600):
+    """清理过期的朗读临时 wav（/tts 端点每次合成会落盘一个 tts_*.wav，
+    只在响应传输期间有用；超过 1 小时的直接删除，防止 tmp 目录无限增长）。"""
+    try:
+        now = time.time()
+        for name in os.listdir(TMP_ROOT):
+            if not (name.startswith("tts_") and name.endswith(".wav")):
+                continue
+            p = os.path.join(TMP_ROOT, name)
+            try:
+                if now - os.path.getmtime(p) > max_age_seconds:
+                    os.remove(p)
+            except OSError:
+                pass
+    except Exception:  # noqa: BLE001
+        pass
 
 
 def _synth_chunks(character, text, top_k, top_p, temperature, speed, sample_steps):
@@ -573,6 +591,7 @@ def tts(
         raise HTTPException(404, "角色不可用: %s（可用角色见 GET /models）" % character)
     try:
         logger.info("合成文字(%d字) 角色=%s: %s", len(text), character, text[:40])
+        _cleanup_tmp_wavs()
         with _synth_lock:
             audio_np, sr = _synth_chunks(
                 character, text, top_k, top_p, temperature, speed, sample_steps=sample_steps)
@@ -604,9 +623,24 @@ def free_memory():
 
 @app.post("/api/reset")
 def reset():
-    """卡住时一键重置：1 秒后退出进程，由启动脚本看门狗自动重启。"""
+    """卡住时一键重置：先拉起一个分离的新进程接管服务（继承当前环境变量，
+    日志续写 log\\tts.log），1 秒后退出当前进程，实现自愈重启，无需人工再点启动脚本。"""
     def _do():
         time.sleep(1)
+        try:
+            script = os.path.abspath(__file__)
+            log_dir = os.path.join(os.path.dirname(os.path.dirname(SCRIPT_DIR)), "log")
+            os.makedirs(log_dir, exist_ok=True)
+            out = open(os.path.join(log_dir, "tts.log"), "ab")
+            err = open(os.path.join(log_dir, "tts.err.log"), "ab")
+            flags = 0x00000008 | 0x00000200 if os.name == "nt" else 0  # DETACHED_PROCESS | NEW_PROCESS_GROUP
+            subprocess.Popen(
+                [sys.executable, script], cwd=SCRIPT_DIR,
+                stdout=out, stderr=err, stdin=subprocess.DEVNULL,
+                creationflags=flags, close_fds=True,
+            )
+        except Exception:  # noqa: BLE001
+            logger.exception("拉起新进程失败，仅退出当前进程（需手动重新启动）")
         os._exit(0)
     threading.Thread(target=_do, daemon=True).start()
     return {"message": "服务即将重置重启，约 10 秒后恢复"}
@@ -742,10 +776,12 @@ async def openai_compat_speech(request: Request):
         top_k, top_p, temperature = 12, 0.9, 0.7
     try:
         logger.info("OpenAI兼容合成(%d字) 角色=%s: %s", len(text), character, text[:40])
+        _cleanup_tmp_wavs()
         with _synth_lock:
             audio_np, sr = _synth_chunks(character, text, top_k, top_p, temperature, speed, sample_steps=TTS_SAMPLE_STEPS)
         if len(audio_np) == 0:
             raise HTTPException(500, "合成结果为空")
+        # mp3 转码放在合成锁之外：转码期间即可开始下一条合成，连续朗读更快
         mp3 = _wav_to_mp3(audio_np, sr)
         if mp3:
             return Response(content=mp3, media_type="audio/mpeg")
@@ -764,7 +800,6 @@ def _wav_to_mp3(audio_np, sr):
     """用 ffmpeg 把合成音频转成 mp3 字节；失败返回 None（调用方回退 wav）。
     查找顺序：环境变量 FFMPEG_PATH → 系统 PATH 中的 ffmpeg。"""
     try:
-        import subprocess
         candidates = [
             os.environ.get("FFMPEG_PATH", ""),
             "ffmpeg",
@@ -775,8 +810,7 @@ def _wav_to_mp3(audio_np, sr):
                 continue
             if c == "ffmpeg":
                 # PATH 查找
-                import shutil as _sh
-                if _sh.which("ffmpeg"):
+                if shutil.which("ffmpeg"):
                     ffmpeg = "ffmpeg"
                     break
             elif os.path.isfile(c):

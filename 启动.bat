@@ -18,7 +18,7 @@ set "WEBUI_EXE=%~dp0venv\Scripts\open-webui.exe"
 rem ========== 1. Ollama native ==========
 echo  [1/5] Checking Ollama...
 if not exist "%OLLAMA_EXE%" (
-    echo  [ERROR] Ollama not found. Please install Ollama first (see DEPLOY.md).
+    echo  [ERROR] Ollama not found. Please install Ollama first ^(see DEPLOY.md^).
     pause
     exit /b 1
 )
@@ -53,7 +53,7 @@ echo      Ollama ready (models: qwen2.5:7b + bge-m3).
 rem ========== 2. Open WebUI native ==========
 echo  [2/5] Checking Open WebUI...
 if not exist "%WEBUI_EXE%" (
-    echo  [ERROR] Open WebUI not found (venv not installed). See DEPLOY.md.
+    echo  [ERROR] Open WebUI not found ^(venv not installed^). See DEPLOY.md.
     pause
     exit /b 1
 )
@@ -117,14 +117,14 @@ rem ========== 4. Built-in TTS voice service (8061) ==========
 echo  [4/5] Checking built-in TTS voice service (trained voice, port 8061)...
 powershell -NoProfile -Command "try { Invoke-RestMethod -Uri 'http://127.0.0.1:8061/health' -TimeoutSec 3 | Out-Null; exit 0 } catch { exit 1 }" >nul 2>&1
 if %errorlevel% equ 0 (
-    echo      TTS service already running (8061), reading uses trained voice.
+    echo      TTS service already running ^(8061^), reading uses trained voice.
     goto tts_finish
 )
 echo      Starting built-in TTS service (CPU mode if VRAM < 10GB; chat unaffected)...
 set "TTS_DEVICE=cuda"
 for /f "usebackq delims=" %%v in (`powershell -NoProfile -Command "$g = (nvidia-smi --query-gpu=memory.total --format=csv,noheader,nounits 2>$null); if ($g) { $m = [int]($g[0].Trim()); if ($m -lt 10240) { 'cpu' } else { 'cuda' } } else { 'cuda' }"`) do set "TTS_DEVICE=%%v"
 echo      Inference device: %TTS_DEVICE%
-powershell -NoProfile -Command "$env:TTS_API_PORT='8061'; $env:GSV_MODELS_DIR='%~dp0ÎÄ×ÖÇý¶¯ÓïÒô\tts_service\models'; $env:TTS_DEFAULT_VOICE='azhong'; $env:TTS_DEVICE='%TTS_DEVICE%'; $p = Start-Process -FilePath '%~dp0runtime\py312\python.exe' -ArgumentList '%~dp0ÎÄ×ÖÇý¶¯ÓïÒô\tts_service\tts_api.py' -WindowStyle Minimized -PassThru -RedirectStandardOutput '%~dp0log\tts.log' -RedirectStandardError '%~dp0log\tts.err.log'; $p.Id | Out-File -FilePath '%~dp0data\tts.pid' -Encoding ascii"
+powershell -NoProfile -Command "$env:TTS_API_PORT='8061'; $env:GSV_MODELS_DIR='%~dp0ÎÄ×ÖÇý¶¯ÓïÒô\tts_service\models'; $env:TTS_DEFAULT_VOICE='azhong'; $env:TTS_DEVICE='%TTS_DEVICE%'; $env:FFMPEG_PATH='%~dp0runtime\ffmpeg\bin\ffmpeg.exe'; $p = Start-Process -FilePath '%~dp0runtime\py312\python.exe' -ArgumentList '%~dp0ÎÄ×ÖÇý¶¯ÓïÒô\tts_service\tts_api.py' -WindowStyle Minimized -PassThru -RedirectStandardOutput '%~dp0log\tts.log' -RedirectStandardError '%~dp0log\tts.err.log'; $p.Id | Out-File -FilePath '%~dp0data\tts.pid' -Encoding ascii"
 set /a n=0
 :ttswait
 set /a n+=1
@@ -134,7 +134,7 @@ if %n% gtr 40 (
 )
 powershell -NoProfile -Command "try { Invoke-RestMethod -Uri 'http://127.0.0.1:8061/health' -TimeoutSec 3 | Out-Null; exit 0 } catch { exit 1 }" >nul 2>&1
 if %errorlevel% equ 0 (
-    echo      TTS service ready (8061), reading uses trained voice.
+    echo      TTS service ready ^(8061^), reading uses trained voice.
     goto tts_finish
 )
 ping -n 5 127.0.0.1 >nul
@@ -145,7 +145,7 @@ rem ========== 5. Digital human avatar service (48620) ==========
 echo  [5/5] Digital human avatar service (light-avatar:48620)...
 powershell -NoProfile -Command "try { Invoke-RestMethod -Uri 'http://127.0.0.1:48620/api/libs' -TimeoutSec 3 | Out-Null; exit 0 } catch { exit 1 }" >nul 2>&1
 if %errorlevel% equ 0 (
-    echo      Avatar service already running (48620).
+    echo      Avatar service already running ^(48620^).
     goto av_ok
 )
 echo      Starting avatar service (lightweight Python, low memory)...
@@ -158,7 +158,7 @@ set /a n=0
 :avwait
 set /a n+=1
 if %n% gtr 12 (
-    echo  [WARN] Avatar start timeout. Face panel unavailable (chat unaffected).
+    echo  [WARN] Avatar start timeout. Face panel unavailable ^(chat unaffected^).
     goto av_done
 )
 powershell -NoProfile -Command "try { Invoke-RestMethod -Uri 'http://127.0.0.1:48620/api/libs' -TimeoutSec 3 | Out-Null; exit 0 } catch { exit 1 }" >nul 2>&1
