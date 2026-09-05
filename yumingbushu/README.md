@@ -19,8 +19,8 @@
 本目录是 **duihuamoxing（知音 ZhiYin：Open WebUI 对话 + 知识库 + Ollama 大模型 + 数字人 + 朗读 TTS）的「公网部署工作台」**，已并入 duihuamoxing 仓库、作为其子目录 `yumingbushu/` 存在（原为同级兄弟仓库，2026-09-06 起合并）。负责三件事：
 
 1. **开隧道**：用 Cloudflare Tunnel（连接器主动外连）把本机服务发布到公网 `https://nas.905283.xyz`，**不需要公网 IP、不需要路由器端口映射**；
-2. **加登录**：入口前挡一层自研登录网关（`login_gateway`，8091，反向代理 Open WebUI 8088），账号密码放在不入库的 `config.json` 里；
-3. **看状态**：自研运维面板（`ops_dashboard`，8090，仅本机访问），实时监控四个服务 + 隧道、查看日志、一键打包诊断。
+2. **加登录**：入口前挡一层自研登录网关（`login_gateway`，8291，反向代理 Open WebUI 8088），账号密码放在不入库的 `config.json` 里；
+3. **看状态**：自研运维面板（`ops_dashboard`，8290，仅本机访问），实时监控四个服务 + 隧道、查看日志、一键打包诊断。
 
 换机器部署时，整个 `duihuamoxing` 文件夹拷走即可（本目录随仓库一起走），按 `DEPLOY.md` 准备 `cloudflared.exe`、隧道 token、网关口令即可，隧道配置（域名映射）在云端、换机无需重配。日常入口用仓库根目录的 **`公网上线.bat` / `公网下线.bat` / `公网状态.bat`**（分别调用本目录 `start.bat` / `stop.bat` / `check_status.bat`）。
 
@@ -40,11 +40,11 @@
 
 ```
 duihuamoxing\yumingbushu\            ← 本目录（部署工作台，duihuamoxing 的子目录）
-├── login_gateway/            # 自研登录网关（8091，反向代理 8088）
+├── login_gateway/            # 自研登录网关（8291，反向代理 8088）
 │   ├── main.py               # 网关代码（Python/FastAPI）
 │   ├── config.json.example   # 配置模板：复制为 config.json 后填强密码
 │   └── config.json           # （自建，不入库）网关账号口令
-├── ops_dashboard/            # 自研运维面板（8090，仅本机）
+├── ops_dashboard/            # 自研运维面板（8290，仅本机）
 │   ├── main.py
 │   └── index.html
 ├── cloudflared/              # （自备，不入库）cloudflared.exe + tunnel-token.txt

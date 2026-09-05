@@ -171,9 +171,18 @@ cd gptsovits\GPT-SoVITS
 | 只启数字人 | `数字人\启动.bat` |
 | 只启朗读 | `文字驱动语音\启动.bat`（需已有引擎+模型） |
 | 查看状态 | `状态.bat` |
+| **公网上线** | 双击 `公网上线.bat`（= 本地服务 → 登录网关 8291 → Cloudflare Tunnel，隧道步骤弹 UAC；需 `yumingbushu\cloudflared\` 已备好 cloudflared.exe + token，详见 `yumingbushu\README.md`） |
+| 公网下线 | 双击 `公网下线.bat`（先关隧道再关服务） |
+| 公网状态 | 双击 `公网状态.bat`（四服务 + 隧道 + 外网可达性体检） |
 
 **首次打开对话界面**：http://localhost:8088 → 创建管理员账号并登录（WEBUI_AUTH=True），
 顶部模型选 `qwen2.5:7b` 即可对话。
+
+**公网访问验证**：手机关 Wi-Fi 用流量打开 https://nas.905283.xyz → 先见登录网关登录页
+（口令在 `yumingbushu\login_gateway\config.json`，不入库），登录后即「知音」。
+> 注意：cloudflared 若已注册为 Windows 服务，服务绑定的二进制是绝对路径——整体挪动
+> duihuamoxing 文件夹或删除旧工作台目录后，用管理员运行一次
+> `yumingbushu\reinstall_cloudflared_service.bat` 重注册即可。
 
 ---
 

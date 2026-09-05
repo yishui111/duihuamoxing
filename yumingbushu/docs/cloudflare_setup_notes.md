@@ -13,7 +13,7 @@ Cloudflare Tunnel 的思路是：**让家里的电脑主动向外网发起连接
 
 - **域名（如 905283.xyz）** = 招牌，挂在云端，永不消失
 - **隧道连接器 cloudflared** = 传菜员，负责把外网请求转到你电脑的指定端口
-- **本地服务（如 duihuamoxing，8088/8091 等）** = 厨师，处理请求返回网页
+- **本地服务（如 duihuamoxing，8088/8291 等）** = 厨师，处理请求返回网页
 
 换电脑完全不影响：新机器上重新放好 cloudflared.exe + 同一个 Token，隧道自动接上，
 域名绑定（Public Hostname 映射）在云端，无需重配。
@@ -73,7 +73,7 @@ Cloudflare Tunnel 的思路是：**让家里的电脑主动向外网发起连接
 
 1. **（可选）国内访问加速**：Cloudflare 默认走国际节点，国内直连较慢属正常；
    可搜索「Cloudflare 优选 IP」工具自行优化，普通个人使用可暂不处理
-2. **（强烈推荐）加一道登录**：本仓库用自研 `login_gateway`（8091，公网入口登录，
+2. **（强烈推荐）加一道登录**：本仓库用自研 `login_gateway`（8291，公网入口登录，
    口令在不入库的 `login_gateway\config.json`）；内容系统内 Open WebUI 建议再开
    自带登录认证（WEBUI_AUTH=True）
 3. **（可选）Cloudflare Zero Trust Access**：Zero Trust → Access → Applications 给域名

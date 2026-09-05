@@ -27,7 +27,7 @@ Cloudflare 边缘节点 ── Cloudflare Tunnel ──（连接器主动外连�
 本机 cloudflared（Windows 服务，开机自启）
    │
    ▼
-自研登录网关 login_gateway :8091   （公网入口第一道登录，口令在 config.json）
+自研登录网关 login_gateway :8291   （公网入口第一道登录，口令在 config.json）
    │
    ▼
 Open WebUI「知音」:8088            （内容系统，duihuamoxing）
@@ -141,8 +141,8 @@ cloudflared service install <tunnel-token.txt 里的内容>
 | 项 | 值 |
 |---|---|
 | Open WebUI「知音」对话 | 8088（内容系统内部） |
-| 登录网关（公网入口） | 8091（反向代理 8088） |
-| 运维面板（仅本机） | 8090 |
+| 登录网关（公网入口） | 8291（反向代理 8088） |
+| 运维面板（仅本机） | 8290 |
 | Ollama API | 11434 |
 | 数字人素材服务 | 48620 |
 | 内置朗读 TTS | 8061 |
@@ -222,7 +222,7 @@ schtasks /Create /TN "ZhiYinBackup" /TR "<项目根>\yumingbushu\backup_webui.ba
 | 检查项 | 结果 |
 |---|---|
 | cloudflared 服务状态 | RUNNING / 前台窗口 |
-| 本机 8088 / 8091 / 8090 | 全部可访问 |
+| 本机 8088 / 8291 / 8290 | 全部可访问 |
 | 手机流量访问 https://nas.905283.xyz | 登录成功并进入「知音」 |
 | 计划任务 ZhiYinHealthCheck / ZhiYinBackup | 已创建 / 已触发 |
 | 健康检查自动拉起 | 停止 8088 后 5 分钟内自动恢复 |
