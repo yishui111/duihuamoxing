@@ -1,0 +1,4 @@
+{
+  "start": ["start.bat", "启动.bat", "一键启动全部.bat"],
+  "stop": ["stop.bat", "关闭.bat", "一键关闭全部.bat"]
+}

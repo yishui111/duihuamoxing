@@ -26,10 +26,17 @@ token*
 *password*
 *credential*
 
+# ===== 本项目敏感配置（不入库，自行创建）=====
+# 登录网关口令配置（复制 config.json.example 后填写）
+config.json
+config.json.local
+
 # ===== 日志/缓存/临时 =====
 logs/
 log/
 *.log
+gw.log
+gw.err.log
 cache/
 .cache/
 tmp/
@@ -87,13 +94,12 @@ ziliao/
 *.npy
 *.npz
 image.tar
-# 注意：若特意保留小型 UI 资源（图标/预览截图），用 ! 反忽略，如：
+# 若特意保留小型 UI 资源（图标/预览截图），用 ! 反忽略，如：
 # !预览图.png
 
 # ===== 第三方运行时/引擎（体积巨大，不随仓库分发）=====
 runtime/
 run/
-venv/
 webui/
 A1111_WebUI/
 gptsovits/
@@ -109,53 +115,16 @@ backup/
 *.bak
 *.bak_*
 
+# ===== 运行期产物 =====
+# 一键诊断包（collect_logs.bat / 运维面板生成）
+diag_*.zip
+diag_tmp/
+# 网关运行期自生成的会话签名密钥
+login_gateway/.secret
+
 # ===== 项目临时目录 =====
 .pnpm-store/
 .extract_tmp/
 _extract/
 _sessions/
 sessions/
-
-# ===== duihuamoxing / 知音 项目专属 =====
-# 公共运行时/数据（部署后生成，见 DEPLOY.md；不入 Git）
-venv/
-runtime/
-data/
-log/
-logs/
-sessions/
-ziliao/
-patched/
-树莓派小智/
-.extract_tmp/
-_scan_login.py
-_auth_dom.html
-*.exe
-*.pid
-
-# 第三方小智（xiaozhi）项目源码副本（上游开源，不在本仓库）
-py-xiaozhi/
-xiaozhi-server/
-shumeipai/
-
-# 数字人素材库（真人素材，运行时生成）
-数字人/avatar_input/
-数字人/avatar_libs/*
-!数字人/avatar_libs/README.md
-
-# TTS 引擎与声音模型（第三方引擎 / 个人声音数据）
-文字驱动语音/gptsovits/
-文字驱动语音/tts_service/models/*
-!文字驱动语音/tts_service/models/README.md
-文字驱动语音/tts_service/tmp/
-
-# 公网部署工作台 yumingbushu/（原兄弟仓库，已并入为子目录）——敏感/运行期文件一律不入库
-yumingbushu/cloudflared/
-yumingbushu/login_gateway/config.json
-yumingbushu/login_gateway/config.json.local
-yumingbushu/login_gateway/.secret
-yumingbushu/backup/
-yumingbushu/diag_*.zip
-yumingbushu/diag_tmp/
-yumingbushu/_test_*.bat
-yumingbushu/_start_all*.log

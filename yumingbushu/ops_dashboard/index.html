@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>知音 · 运维工作台</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family: "Microsoft YaHei", system-ui, sans-serif; background:#0f172a; color:#e2e8f0; }
+  .wrap { max-width:1200px; margin:0 auto; padding:20px; }
+  header { display:flex; align-items:center; justify-content:space-between; margin-bottom:20px; }
+  header h1 { font-size:22px; color:#f8fafc; }
+  header .time { color:#94a3b8; font-size:14px; }
+  .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:12px; margin-bottom:20px; }
+  .card { background:#1e293b; border:1px solid #334155; border-radius:10px; padding:14px; }
+  .card .label { color:#94a3b8; font-size:12px; margin-bottom:6px; }
+  .card .value { font-size:18px; font-weight:600; }
+  .dot { display:inline-block; width:10px; height:10px; border-radius:50%; margin-right:6px; }
+  .ok { background:#22c55e; }
+  .bad { background:#ef4444; }
+  .section { background:#1e293b; border:1px solid #334155; border-radius:10px; padding:14px; margin-bottom:20px; }
+  .section h2 { font-size:15px; color:#cbd5e1; margin-bottom:10px; }
+  .bar { height:10px; background:#334155; border-radius:5px; overflow:hidden; margin:6px 0; }
+  .bar > div { height:100%; background:#3b82f6; }
+  table { width:100%; border-collapse:collapse; font-size:13px; }
+  th,td { text-align:left; padding:6px 8px; border-bottom:1px solid #334155; }
+  th { color:#94a3b8; font-weight:normal; }
+  .logs { display:flex; gap:12px; }
+  .loglist { width:200px; flex-shrink:0; }
+  .loglist .item { padding:7px 10px; border-radius:6px; cursor:pointer; font-size:13px; color:#cbd5e1; }
+  .loglist .item:hover { background:#334155; }
+  .loglist .item.active { background:#3b82f6; color:#fff; }
+  .loglist .item small { color:#64748b; display:block; }
+  .logview { flex:1; background:#0b1220; border:1px solid #334155; border-radius:8px; padding:10px; height:480px; overflow:auto; }
+  .logview pre { font-family: Consolas, monospace; font-size:12px; white-space:pre-wrap; word-break:break-all; color:#a5f3fc; }
+  .btn { background:#3b82f6; color:#fff; border:none; padding:8px 16px; border-radius:6px; cursor:pointer; font-size:14px; }
+  .btn:hover { background:#2563eb; }
+  .btn.gray { background:#475569; }
+  .controls { display:flex; gap:10px; align-items:center; margin-bottom:10px; }
+  select { background:#1e293b; color:#e2e8f0; border:1px solid #334155; padding:6px 8px; border-radius:6px; }
+  .diag { margin-top:10px; padding:8px; background:#0b1220; border-radius:6px; font-size:12px; color:#86efac; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>🛠 知音 · 运维工作台</h1>
+    <div class="time" id="time">--</div>
+  </header>
+
+  <div class="grid" id="statusCards"></div>
+
+  <div class="section">
+    <h2>资源</h2>
+    <div id="resources"></div>
+  </div>
+
+  <div class="section">
+    <h2>进程</h2>
+    <table id="procs"><thead><tr><th>进程</th><th>PID</th><th>内存</th></tr></thead><tbody></tbody></table>
+  </div>
+
+  <div class="section">
+    <h2>日志查看</h2>
+    <div class="controls">
+      <span>选择日志：</span>
+      <select id="logSelect"></select>
+      <span>行数：</span>
+      <select id="lineCount">
+        <option value="100">100</option>
+        <option value="300" selected>300</option>
+        <option value="1000">1000</option>
+      </select>
+      <button class="btn gray" id="refreshLogBtn" onclick="loadLog()">刷新日志</button>
+      <span style="color:#64748b;font-size:12px">自动刷新：<input type="checkbox" id="autoLog" checked></span>
+    </div>
+    <div class="logs">
+      <div class="loglist" id="logList"></div>
+      <div class="logview"><pre id="logContent">请选择日志文件…</pre></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>诊断</h2>
+    <button class="btn" onclick="makeDiag()">📦 一键生成诊断包</button>
+    <div class="diag" id="diagResult">点击按钮，打包全部日志 + 系统信息到 yumingbushu 目录。</div>
+  </div>
+</div>
+
+<script>
+const SERVERS = [
+  { port: '8088', name: 'Open WebUI 对话' },
+  { port: '11434', name: 'Ollama 模型' },
+  { port: '48620', name: '数字人' },
+  { port: '8061', name: '朗读 TTS' },
+];
+
+async function loadStatus() {
+  try {
+    const r = await fetch('/api/status');
+    const s = await r.json();
+    document.getElementById('time').textContent = '刷新于 ' + s.time;
+
+    let cards = '';
+    for (const sv of SERVERS) {
+      const up = s.ports[sv.port];
+      cards += `<div class="card"><div class="label">${sv.name} <span class="dot ${up ? 'ok' : 'bad'}"></span></div>
+        <div class="value">${up ? '运行中' : '已停止'}</div><div style="color:#64748b;font-size:12px">端口 ${sv.port}</div></div>`;
+    }
+    cards += `<div class="card"><div class="label">隧道 cloudflared <span class="dot ${s.tunnel_up ? 'ok' : 'bad'}"></span></div>
+      <div class="value">${s.tunnel_up ? '已连接' : '断开'}</div><div style="color:#64748b;font-size:12px">开机自启</div></div>`;
+    document.getElementById('statusCards').innerHTML = cards;
+
+    let res = '';
+    if (s.gpu.available) {
+      const pct = Math.round(s.gpu.used / s.gpu.total * 100);
+      res += `<div class="card" style="grid-column:span 2"><div class="label">GPU ${s.gpu.name}</div>
+        <div class="value">${pct}%</div>
+        <div class="bar"><div style="width:${pct}%"></div></div>
+        <div style="color:#94a3b8;font-size:12px">已用 ${s.gpu.used}MB / ${s.gpu.total}MB（空闲 ${s.gpu.free}MB）</div></div>`;
+    } else {
+      res += `<div class="card"><div class="label">GPU</div><div class="value">不可用</div></div>`;
+    }
+    for (const d of s.disks) {
+      const pct = Math.round(d.used_gb / d.total_gb * 100);
+      res += `<div class="card"><div class="label">磁盘 ${d.drive}</div>
+        <div class="value">${pct}%</div>
+        <div class="bar"><div style="width:${pct}%"></div></div>
+        <div style="color:#94a3b8;font-size:12px">空闲 ${d.free_gb}GB / 共 ${d.total_gb}GB</div></div>`;
+    }
+    document.getElementById('resources').innerHTML = res;
+
+    const tb = document.querySelector('#procs tbody');
+    tb.innerHTML = s.procs.map(p => `<tr><td>${p.name}</td><td>${p.pid}</td><td>${p.mem_mb} MB</td></tr>`).join('');
+  } catch (e) {
+    console.error(e);
+  }
+}
+
+async function loadLogList() {
+  const r = await fetch('/api/logs');
+  const d = await r.json();
+  const list = document.getElementById('logList');
+  list.innerHTML = d.logs.map(l =>
+    `<div class="item" data-name="${l.name}" onclick="pickLog('${l.name}')">
+       ${l.name}<small>${l.size} B · ${l.mtime}</small></div>`).join('');
+  const sel = document.getElementById('logSelect');
+  sel.innerHTML = d.logs.map(l => `<option value="${l.name}">${l.name}</option>`).join('');
+  if (d.logs.length) { pickLog(d.logs[0].name); }
+}
+
+let currentLog = '';
+async function pickLog(name) {
+  currentLog = name;
+  document.querySelectorAll('.loglist .item').forEach(el => el.classList.toggle('active', el.dataset.name === name));
+  document.getElementById('logSelect').value = name;
+  await loadLog();
+}
+
+async function loadLog() {
+  if (!currentLog) return;
+  const lines = document.getElementById('lineCount').value;
+  const r = await fetch(`/api/logs/${currentLog}?lines=${lines}`);
+  const d = await r.json();
+  document.getElementById('logContent').textContent = d.content || '（空）';
+  const v = document.querySelector('.logview');
+  v.scrollTop = v.scrollHeight;
+}
+
+async function makeDiag() {
+  const btn = document.querySelector('.diag');
+  btn.textContent = '正在生成诊断包…';
+  const r = await fetch('/api/diag');
+  const d = await r.json();
+  btn.innerHTML = `✅ 诊断包已生成：<b>${d.zip}</b><br/>${d.path}`;
+}
+
+setInterval(loadStatus, 5000);
+setInterval(() => { if (document.getElementById('autoLog').checked) loadLog(); }, 3000);
+loadStatus();
+loadLogList();
+</script>
+</body>
+</html>
