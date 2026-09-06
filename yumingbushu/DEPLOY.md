@@ -195,8 +195,8 @@ schtasks /Create /TN "ZhiYinBackup" /TR "<项目根>\yumingbushu\backup_webui.ba
 ## 9. 本机与目标机器可能不同的项
 
 - **路径**：脚本全部用 `%~dp0` / `$PSScriptRoot` 相对定位，整个 duihuamoxing 文件夹放哪个路径都行；
-  但 cloudflared **装成服务后不能移动**（服务绑定绝对路径）——换路径后以管理员运行
-  `reinstall_cloudflared_service.bat` 重注册一次即可
+  但 cloudflared **装成服务后不能移动**（服务绑定绝对路径），定时任务同理——换路径后以管理员
+  运行一次 `finalize_move.bat`（服务 + 计划任务一并重指向本目录）即可
 - **端口冲突**：8088 被占用时改 duihuamoxing 启动脚本里的 `--port`，并同步改云端
   隧道映射（见第 10 节）
 - **无 GPU 机器**：TTS 自动降级 CPU（慢但可用），对话不受影响
@@ -227,3 +227,17 @@ schtasks /Create /TN "ZhiYinBackup" /TR "<项目根>\yumingbushu\backup_webui.ba
 | 计划任务 ZhiYinHealthCheck / ZhiYinBackup | 已创建 / 已触发 |
 | 健康检查自动拉起 | 停止 8088 后 5 分钟内自动恢复 |
 | 备份恢复演练 | webui.db 备份可覆盖还原 |
+
+### 2026-09-07 工作台并入 duihuamoxing + 迁移收尾（实测通过）
+
+| 检查项 | 结果 |
+|---|---|
+| cloudflared 服务 | RUNNING，BINARY_PATH 已重注册到 `duihuamoxing\yumingbushu\cloudflared\`（finalize_move.ps1） |
+| 计划任务 | ZhiYinBackup / ZhiYinHealthCheck 均已重指向新目录（HealthCheck 保持原 Disabled 状态） |
+| 本机 8088 / 8291 / 8290 | 全部可访问；网关登录 302/401/cookie/代理页面 端到端通过 |
+| 公网 https://nas.905283.xyz | HTTP 200（隧道重启后约 1 分钟内恢复） |
+| 备份 | backup_webui.bat 实测出 webui_20260906_524.db；今晨自动备份 300.db 已抢救迁入 |
+| 旧目录 D:\xm\yumingbushu | 已删除（与 gitee 远程同步，无未推送内容） |
+
+> 注：本次实测同时发现并修复了 6 处 bat「if 块内 echo 带括号」解析错误（含原仓库的
+> assemble.bat 与 文字驱动语音\启动.bat）与 启动.bat GPU 检测单行输出误判问题。

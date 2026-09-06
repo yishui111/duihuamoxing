@@ -1,0 +1,4 @@
+# 运维面板 + 登录网关 依赖(复用相邻 duihuamoxing/venv 时无需安装)
+fastapi
+uvicorn
+httpx

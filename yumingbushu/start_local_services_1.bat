@@ -7,7 +7,7 @@ setlocal
 for %%I in ("%~dp0..") do set "PROJECT=%%~fI"
 if not exist "%PROJECT%\" (
     echo [ERROR] project root not found: %PROJECT%
-    echo This folder must stay inside the duihuamoxing project (duihuamoxing\yumingbushu).
+    echo This folder must stay inside the duihuamoxing project: duihuamoxing\yumingbushu.
     exit /b 1
 )
 

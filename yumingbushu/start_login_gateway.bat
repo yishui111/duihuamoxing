@@ -6,7 +6,7 @@ for %%I in ("%~dp0..") do set "PROJECT=%%~fI"
 set "PYEXE=%PROJECT%\venv\Scripts\python.exe"
 if not exist "%PYEXE%" (
     echo [ERROR] Python not found: %PYEXE%
-    echo Install the duihuamoxing venv first (see ..\DEPLOY.md).
+    echo Install the duihuamoxing venv first - see ..\DEPLOY.md.
     exit /b 1
 )
 if not exist "%~dp0login_gateway\config.json" (

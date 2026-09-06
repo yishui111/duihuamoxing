@@ -19,7 +19,7 @@ if not exist "%CFD%" (
 )
 if not exist "%TOKEN_FILE%" (
     echo [ERROR] tunnel token file not found: %TOKEN_FILE%
-    echo Create it from your Cloudflare dashboard tunnel (Zero Trust -^> Networks -^> Tunnels).
+    echo Create it from your Cloudflare dashboard tunnel: Zero Trust - Networks - Tunnels.
     exit /b 1
 )
 

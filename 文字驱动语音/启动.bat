@@ -21,7 +21,7 @@ powershell -NoProfile -Command "$d='%GSV_MODELS_DIR%'; $ok=$false; Get-ChildItem
 if %errorlevel% neq 0 (
     echo [ERROR] No complete voice model found under tts_service\models.
     echo         Each role folder needs: .ckpt + .pth + ref.wav + ref_text.txt
-    echo         See 模型放置与使用.md (model placement guide).
+    echo         See 模型放置与使用.md - model placement guide.
     pause
     exit /b 1
 )

@@ -3,7 +3,7 @@
 > ⚠️ 修改本仓库前先读本文件（AI 助手/开发者项目记忆）。用户向文档见 README.md / DEPLOY.md / 使用说明.md。
 
 ## 1. 定位
-本地私有四合一综合 AI 对话系统：**对话 + 知识库 + 数字人 + 朗读**，一键全启动、数据不出门。品牌名「知音 ZhiYin」。原兄弟仓库 yumingbushu（Cloudflare Tunnel 部署工作台）已于 2026-09-06 并入为本仓库子目录 `yumingbushu/`，双击根目录「公网上线.bat」即可发布公网 nas.905283.xyz（登录网关 8291 反代 8088，运维面板 8290 仅本机；旧同级目录 D:\xm\yumingbushu 已弃用，勿再改它）。
+本地私有四合一综合 AI 对话系统：**对话 + 知识库 + 数字人 + 朗读**，一键全启动、数据不出门。品牌名「知音 ZhiYin」。原兄弟仓库 yumingbushu（Cloudflare Tunnel 部署工作台）已于 2026-09-06 并入为本仓库子目录 `yumingbushu/`，双击根目录「公网上线.bat」即可发布公网 nas.905283.xyz（登录网关 8291 反代 8088，运维面板 8290 仅本机；旧同级目录 D:\xm\yumingbushu 已于 2026-09-07 删除，勿再引用）。
 
 ## 2. 端口 / 组件
 | 端口 | 组件 |
@@ -35,6 +35,6 @@ venv/、runtime/、data/（open-webui 库/用户数据/ollama 模型）、log/�
 ### 关键点（2026-09-06 yumingbushu 并入）
 - yumingbushu/ 是子目录不再是兄弟仓库：其脚本 PROJECT 一律 `%~dp0..` 解析到本仓库根；根目录新增 公网上线.bat/公网下线.bat/公网状态.bat（ASCII+CRLF）调用 yumingbushu\start|stop|check_status.bat
 - 敏感且需自备（已 gitignore）：yumingbushu\cloudflared\cloudflared.exe + tunnel-token.txt、login_gateway\config.json、login_gateway\.secret、backup\
-- cloudflared Windows 服务 BINARY_PATH 仍指旧位置 D:\xm\yumingbushu：删旧目录前先以管理员运行 yumingbushu\reinstall_cloudflared_service.bat 重注册；start_cloudflared_2.bat 已加"服务启动失败→本目录前台运行"回退
+- cloudflared 服务与 ZhiYinBackup/ZhiYinHealthCheck 计划任务已于 2026-09-07 用 yumingbushu\finalize_move.bat(.ps1) 重指向新目录，旧同级目录已删除；日后整体挪动 duihuamoxing 后再运行一次它即可；start_cloudflared_2.bat 保留"服务启动失败→本目录前台运行"回退
 - silent_start_local.bat 已固定 Open WebUI 工作目录到项目根（否则会生成第二把 .webui_secret_key，重启后登录态全失效）并补齐 OLLAMA_MODELS 等环境变量
 - 8290 端口与用户另一项目 chat_workbench.py 冲突：跑运维面板前先关它

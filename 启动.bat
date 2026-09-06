@@ -122,7 +122,7 @@ if %errorlevel% equ 0 (
 )
 echo      Starting built-in TTS service (CPU mode if VRAM < 10GB; chat unaffected)...
 set "TTS_DEVICE=cuda"
-for /f "usebackq delims=" %%v in (`powershell -NoProfile -Command "$g = (nvidia-smi --query-gpu=memory.total --format=csv,noheader,nounits 2>$null); if ($g) { $m = [int]($g[0].Trim()); if ($m -lt 10240) { 'cpu' } else { 'cuda' } } else { 'cuda' }"`) do set "TTS_DEVICE=%%v"
+for /f "usebackq delims=" %%v in (`powershell -NoProfile -Command "$g = @(nvidia-smi --query-gpu=memory.total --format=csv,noheader,nounits 2>$null); if ($g.Count -gt 0) { $m = [int]($g[0].Trim()); if ($m -lt 10240) { 'cpu' } else { 'cuda' } } else { 'cuda' }"`) do set "TTS_DEVICE=%%v"
 echo      Inference device: %TTS_DEVICE%
 powershell -NoProfile -Command "$env:TTS_API_PORT='8061'; $env:GSV_MODELS_DIR='%~dp0ÎÄ×ÖÇý¶¯ÓïÒô\tts_service\models'; $env:TTS_DEFAULT_VOICE='azhong'; $env:TTS_DEVICE='%TTS_DEVICE%'; $env:FFMPEG_PATH='%~dp0runtime\ffmpeg\bin\ffmpeg.exe'; $p = Start-Process -FilePath '%~dp0runtime\py312\python.exe' -ArgumentList '%~dp0ÎÄ×ÖÇý¶¯ÓïÒô\tts_service\tts_api.py' -WindowStyle Minimized -PassThru -RedirectStandardOutput '%~dp0log\tts.log' -RedirectStandardError '%~dp0log\tts.err.log'; $p.Id | Out-File -FilePath '%~dp0data\tts.pid' -Encoding ascii"
 set /a n=0
