@@ -22,10 +22,10 @@
 
 | 子项目 | 端口 | 功能 | 代码 |
 |--------|------|------|------|
-| 对话系统 | 8088 / 11434 | 本地大模型对话 + RAG 知识库（Open WebUI + Ollama） | 启动脚本 + 前端增强 `loader.js` |
+| 对话系统 | 8089 / 11434 | 本地大模型对话 + RAG 知识库（Open WebUI + Ollama） | 启动脚本 + 前端增强 `loader.js` |
 | 数字人 | 48620 | 数字人素材服务：说话视频 → 嘴型图库、声音驱动嘴型 | **自研** `avatar_server.py`（纯 Python 标准库） |
 | 文字驱动语音 | 8061 | 文字 → 训练音色语音合成（GPT-SoVITS OpenAI 兼容封装） | **自研** `tts_service/tts_api.py`（FastAPI） |
-| 公网部署工作台 `yumingbushu/` | 8291 / 8290 | Cloudflare Tunnel 发布公网 + 自研登录网关 + 运维面板 | **自研** `login_gateway/`、`ops_dashboard/` |
+| 公网部署工作台 `yumingbushu/` | 8088 / 8290 | Cloudflare Tunnel 发布公网 + 自研登录网关 + 运维面板 | **自研** `login_gateway/`、`ops_dashboard/` |
 
 - **适合谁**：想在本机搭一套私有 AI 助理、不想把聊天/资料/声音发给云端、又想要"看得见、听得见"的完整体验的用户。
 - **本仓库包含**：三个子项目的自研代码、启动/关闭脚本、`loader.js` 前端增强、运维/排障脚本、人格蒸馏工具、部署文档、公网发布工作台（原兄弟仓库 yumingbushu 已并入为 `yumingbushu/` 子目录）。**模型、运行时、真人素材等大件不随仓库分发**（见下方下载表与 DEPLOY.md）。
@@ -47,10 +47,10 @@
 
 ```
 duihuamoxing/
-├── 对话系统/            # 子项目 1：Open WebUI(8088) + Ollama(11434)，含启动/关闭.bat
+├── 对话系统/            # 子项目 1：Open WebUI(8089) + Ollama(11434)，含启动/关闭.bat
 ├── 数字人/              # 子项目 2：数字人素材服务(48620)，自研 avatar_server.py + avatar_core/avatar_web
 ├── 文字驱动语音/         # 子项目 3：GPT-SoVITS 朗读服务(8061)，自研 tts_service/tts_api.py
-├── yumingbushu/         # 公网部署工作台：cloudflared 隧道脚本 + 自研登录网关(8291) + 运维面板(8290)，见其 README/DEPLOY
+├── yumingbushu/         # 公网部署工作台：cloudflared 隧道脚本 + 自研登录网关(8088) + 运维面板(8290)，见其 README/DEPLOY
 ├── 共享资源/            # 公共依赖（venv/runtime/data 在仓库根共享）说明
 ├── tools/               # 人格蒸馏 / 带记忆对话 / 角色管理（自研，纯标准库）
 ├── scripts/             # 部署与排障脚本（loader.js 集成 / webui.db 修复 / whisper 下载）
@@ -97,7 +97,7 @@ cd duihuamoxing
 
 ### 4. 验证
 
-- 浏览器打开 **http://localhost:8088**，首次使用创建管理员账号并登录，顶部模型选择 `qwen2.5:7b` 即可对话；
+- 浏览器打开 **http://localhost:8089**，首次使用创建管理员账号并登录，顶部模型选择 `qwen2.5:7b` 即可对话；
 - 输入框 `#` 选择知识库引用文档；点喇叭用训练音色朗读；头部数字人小画面可选人物。
 
 ### 5. （可选）发布公网
@@ -141,7 +141,7 @@ git push origin main
 
 - 敏感信息（密钥、token、账号密码）一律放环境变量或 `.env`（参考 `DEPLOY.md`），禁止提交；
 - 本项目**不含真人素材与个人数据**：数字人素材库、训练音色模型、真实个人资料/聊天记录请放在本地并用 `.gitignore` 忽略，不要上传公开仓库；
-- 默认端口仅供本机/内网使用；需要外网访问时用内置的 `公网上线.bat`（Cloudflare Tunnel + 自研登录网关，详见 `yumingbushu\README.md`），不要直接把 8088 端口映射到公网；
+- 默认端口仅供本机/内网使用；需要外网访问时用内置的 `公网上线.bat`（Cloudflare Tunnel + 自研登录网关，详见 `yumingbushu\README.md`），不要直接把 8089 端口映射到公网；
 - 本仓库仅供学习交流使用，涉及他人形象/声音/隐私的内容请自行取得授权。
 
 ## 📄 许可证

@@ -1,5 +1,6 @@
 @echo off
-rem Start ZhiYin Login Gateway (http://127.0.0.1:8291) in front of Open WebUI.
+rem Start ZhiYin Login Gateway on 8088 - the port the Cloudflare tunnel maps to.
+rem It fronts Open WebUI (now on local port 8089).
 rem Uses the venv python of the parent duihuamoxing project (this folder is its sub-directory).
 setlocal
 for %%I in ("%~dp0..") do set "PROJECT=%%~fI"
@@ -15,7 +16,7 @@ if not exist "%~dp0login_gateway\config.json" (
     exit /b 1
 )
 echo Starting ZhiYin Login Gateway...
-start "ZhiYin-LoginGateway" "%PYEXE%" -m uvicorn main:app --host 127.0.0.1 --port 8291 --app-dir "%~dp0login_gateway"
+start "ZhiYin-LoginGateway" "%PYEXE%" -m uvicorn main:app --host 127.0.0.1 --port 8088 --app-dir "%~dp0login_gateway"
 timeout /t 3 /nobreak >nul
-start "" "http://127.0.0.1:8291"
+start "" "http://127.0.0.1:8088"
 exit /b 0

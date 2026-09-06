@@ -3,16 +3,16 @@
 > ⚠️ 修改本仓库前先读本文件（AI 助手/开发者项目记忆）。用户向文档见 README.md / DEPLOY.md / 使用说明.md。
 
 ## 1. 定位
-本地私有四合一综合 AI 对话系统：**对话 + 知识库 + 数字人 + 朗读**，一键全启动、数据不出门。品牌名「知音 ZhiYin」。原兄弟仓库 yumingbushu（Cloudflare Tunnel 部署工作台）已于 2026-09-06 并入为本仓库子目录 `yumingbushu/`，双击根目录「公网上线.bat」即可发布公网 nas.905283.xyz（登录网关 8291 反代 8088，运维面板 8290 仅本机；旧同级目录 D:\xm\yumingbushu 已于 2026-09-07 删除，勿再引用）。
+本地私有四合一综合 AI 对话系统：**对话 + 知识库 + 数字人 + 朗读**，一键全启动、数据不出门。品牌名「知音 ZhiYin」。原兄弟仓库 yumingbushu（Cloudflare Tunnel 部署工作台）已于 2026-09-06 并入为本仓库子目录 `yumingbushu/`，双击根目录「公网上线.bat」即可发布公网 nas.905283.xyz（登录网关 8088 反代 8089，运维面板 8290 仅本机；旧同级目录 D:\xm\yumingbushu 已于 2026-09-07 删除，勿再引用）。
 
 ## 2. 端口 / 组件
 | 端口 | 组件 |
 | ---- | ---- |
-| 8088 | Open WebUI（对话+知识库；loader.js 前端增强） |
+| 8089 | Open WebUI（对话+知识库；loader.js 前端增强） |
 | 11434 | Ollama（qwen2.5:7b 本地对话 / bge-m3 RAG 向量） |
 | 48620 | 自研数字人（avatar_server.py 纯标准库嘴型驱动，素材建库由用户视频自建） |
 | 8061 | GPT-SoVITS 训练音色朗读（文字驱动语音/tts_service/tts_api.py 封装，失败自动回退系统语音） |
-| 8291 | 自研登录网关（yumingbushu/login_gateway，公网入口第一道登录，反代 8088） |
+| 8088 | 自研登录网关（yumingbushu/login_gateway，公网入口第一道登录，反代 8089） |
 | 8290 | 自研运维面板（yumingbushu/ops_dashboard，仅本机访问） |
 
 结构：对话系统/、数字人/、文字驱动语音/、共享资源/、yumingbushu/（公网部署工作台：隧道脚本 + find_entry.ps1/entry_names.json 中文入口探测，勿删）、tools/（人格蒸馏工具，纯标准库）、scripts/（11 个自研运维脚本，路径已相对化）、tests/、docs/、loader.js（单文件前端增强，个人域名已改可配置 window.__DSH_AVATAR_REMOTE__，默认本机）。
@@ -27,7 +27,7 @@ venv/、runtime/、data/（open-webui 库/用户数据/ollama 模型）、log/�
 - 提交 `git push origin main`；中文文档 UTF-8。
 ---
 ### 关键点（2026-09-02 上传整理补充）
-- 知音 ZhiYin 四合一：8088 Open WebUI / 11434 Ollama / 48620 自研数字人(avatar_server.py 纯标准库) / 8061 GPT-SoVITS 朗读(tts_service/tts_api.py)
+- 知音 ZhiYin 四合一：8089 Open WebUI / 11434 Ollama / 48620 自研数字人(avatar_server.py 纯标准库) / 8061 GPT-SoVITS 朗读(tts_service/tts_api.py)
 - 4 个含中文目录调用的 bat（启动/关闭/一键启动全部/一键关闭全部）= GBK + chcp936，勿转 UTF-8、勿去 chcp（否则找不到中文目录）
 - _scan_login.py / _auth_dom.html（登录页探测）一律弃传；loader.js 个人域名已改可配置(window.__DSH_AVATAR_REMOTE__，默认本机)
 - 大件装配全在 DEPLOY.md：Ollama 便携+模型(qwen2.5:7b/bge-m3)、open-webui(pip)、GPT-SoVITS 引擎、whisper(scripts\download_whisper.py)、ffmpeg

@@ -17,7 +17,7 @@
    不要把本目录移出 duihuamoxing 之外
 ---
 ### 关键点（2026-09-02 上传整理补充）
-- 角色：把内容系统 duihuamoxing(知音) 经 Cloudflare Tunnel 发布到公网 nas.905283.xyz；自研 登录网关 login_gateway:8291(反代8088) + 运维面板 ops_dashboard:8290(仅本机)；2026-09-06 端口由 8091/8090 迁移为 8291/8290（避开本机其它项目占用），**云端隧道映射需同步改成 localhost:8291**
+- 角色：把内容系统 duihuamoxing(知音) 经 Cloudflare Tunnel 发布到公网 nas.905283.xyz；自研 登录网关 login_gateway + 运维面板 ops_dashboard:8290(仅本机)。端口沿革：8091/8090 → 8291/8290（2026-09-06）→ **网关 8088 / WebUI 8089**（2026-09-07 最终态，网关占据云端映射的 localhost:8088，云端配置零改动即生效）
 - 密钥类一律不入库且需自备：login_gateway\config.json(建 config.json.example→自行改名填强密码)、\.secret、cloudflared\cloudflared.exe + tunnel-token.txt
 - stop_local_services_2.bat 按「探测关闭类入口(一键关闭全部/关闭)，找不到即报错」实现——勿改成会自动启动服务的版本
 - 中文入口文件名由 find_entry.ps1 + entry_names.json 运行时解析（此两文件勿删）；4 个中文目录 bat = GBK+chcp936 属正常

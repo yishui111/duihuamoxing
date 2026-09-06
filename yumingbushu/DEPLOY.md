@@ -27,10 +27,10 @@ Cloudflare 边缘节点 ── Cloudflare Tunnel ──（连接器主动外连�
 本机 cloudflared（Windows 服务，开机自启）
    │
    ▼
-自研登录网关 login_gateway :8291   （公网入口第一道登录，口令在 config.json）
+自研登录网关 login_gateway :8088   （公网入口第一道登录，口令在 config.json）
    │
    ▼
-Open WebUI「知音」:8088            （内容系统，duihuamoxing）
+Open WebUI「知音」:8089            （内容系统，duihuamoxing）
    └─ Ollama :11434 / 数字人 :48620 / TTS :8061
 ```
 
@@ -45,7 +45,7 @@ Open WebUI「知音」:8088            （内容系统，duihuamoxing）
 | 磁盘 | 内容系统约 30GB+，建议 SSD |
 | 内存 / 显卡 | 由 duihuamoxing 决定（16GB 能跑，32GB + NVIDIA 独显 8GB 更流畅） |
 | 网络 | 能上外网即可（**无需公网 IP**）；上行越高外网越快 |
-| 父目录项目 | **duihuamoxing**（本目录所在的项目根）：含 venv Python、Open WebUI 8088、Ollama 11434、数字人 48620、TTS 8061（其 venv 同时供本目录网关/面板复用） |
+| 父目录项目 | **duihuamoxing**（本目录所在的项目根）：含 venv Python、Open WebUI 8089、Ollama 11434、数字人 48620、TTS 8061（其 venv 同时供本目录网关/面板复用） |
 | cloudflared | 官方二进制（约 52MB），见第 3 步 |
 
 ## 2. 获取代码并放置
@@ -78,7 +78,7 @@ duihuamoxing\          ← 项目根（内容系统，复制自旧机器 / 备�
 1. Tunnels → Create a tunnel → 命名（如 home-tunnel）
 2. 复制生成的 Token → 同上存入 `tunnel-token.txt`
 3. 进该隧道 → Public Hostname → Add：`nas` + 主域名 + HTTP + URL 填
-   `localhost:8291`（公网入口先过登录网关；若你想直连 8088 用 Open WebUI 自带登录，则填 8088）
+   `localhost:8088`（公网入口先过登录网关；若你想直连 8089 用 Open WebUI 自带登录，则填 8089）
 4. 保存，30 秒内生效
 
 > ⚠️ `tunnel-token.txt` 相当于隧道钥匙，等于仓库里的 `cloudflared\` 已被 `.gitignore` 排除，请勿外发。
@@ -119,8 +119,8 @@ cloudflared service install <tunnel-token.txt 里的内容>
 
 | 顺序 | 上线 | 下线 |
 |---|---|---|
-| 1 | `start_local_services_1.bat`：启动本地服务，等 1-3 分钟模型加载，验证 http://localhost:8088 | `stop_cloudflared_1.bat`：先关外网通道 |
-| 2 | `start_login_gateway.bat`：启动登录网关，验证 http://127.0.0.1:8291 | `stop_login_gateway.bat` |
+| 1 | `start_local_services_1.bat`：启动本地服务，等 1-3 分钟模型加载，验证 http://localhost:8089 | `stop_cloudflared_1.bat`：先关外网通道 |
+| 2 | `start_login_gateway.bat`：启动登录网关，验证 http://127.0.0.1:8088 | `stop_login_gateway.bat` |
 | 3 | `start_cloudflared_2.bat`：启动隧道（UAC），自动打开公网域名 | `stop_local_services_2.bat`：最后关本地服务 |
 
 > `start_local_services_1.bat` / `stop_local_services_2.bat` 会自动在 `..\duihuamoxing` 下
@@ -140,8 +140,8 @@ cloudflared service install <tunnel-token.txt 里的内容>
 
 | 项 | 值 |
 |---|---|
-| Open WebUI「知音」对话 | 8088（内容系统内部） |
-| 登录网关（公网入口） | 8291（反向代理 8088） |
+| Open WebUI「知音」对话 | 8089（内容系统内部） |
+| 登录网关（公网入口） | 8088（反向代理 8089） |
 | 运维面板（仅本机） | 8290 |
 | Ollama API | 11434 |
 | 数字人素材服务 | 48620 |
@@ -175,7 +175,7 @@ schtasks /Create /TN "ZhiYinBackup" /TR "<项目根>\yumingbushu\backup_webui.ba
 ## 7. 验证（部署成功标准）
 
 1. `sc query cloudflared` → RUNNING（若已装服务）
-2. 本机 http://localhost:8088 能打开「知音」；http://127.0.0.1:8291 出现登录页
+2. 本机 http://localhost:8089 能打开「知音」；http://127.0.0.1:8088 出现登录页
 3. http://127.0.0.1:8290 运维面板：四服务 + 隧道全绿
 4. **手机流量**（关 Wi-Fi）打开 https://nas.905283.xyz：先登录，后见「知音」，即成功
 
@@ -183,7 +183,7 @@ schtasks /Create /TN "ZhiYinBackup" /TR "<项目根>\yumingbushu\backup_webui.ba
 
 | 现象 | 原因与处理 |
 |---|---|
-| 外网 502 | 本地服务没起：本机打开 http://localhost:8088 验证，起服务后自动恢复 |
+| 外网 502 | 本地服务没起：本机打开 http://localhost:8089 验证，起服务后自动恢复 |
 | 隧道 unhealthy / 连不上 | 网络或服务停了：`start_cloudflared_2.bat` 重启；确认能访问 github.com |
 | 外网很慢 | Cloudflare 走国际节点，国内直连慢属正常；可自行搜索「Cloudflare 优选 IP」 |
 | 提示 Token 失效 | token 与隧道绑定：重建/更新 `cloudflared\tunnel-token.txt` 后重装服务 |
@@ -197,7 +197,7 @@ schtasks /Create /TN "ZhiYinBackup" /TR "<项目根>\yumingbushu\backup_webui.ba
 - **路径**：脚本全部用 `%~dp0` / `$PSScriptRoot` 相对定位，整个 duihuamoxing 文件夹放哪个路径都行；
   但 cloudflared **装成服务后不能移动**（服务绑定绝对路径），定时任务同理——换路径后以管理员
   运行一次 `finalize_move.bat`（服务 + 计划任务一并重指向本目录）即可
-- **端口冲突**：8088 被占用时改 duihuamoxing 启动脚本里的 `--port`，并同步改云端
+- **端口冲突**：8089 被占用时改 duihuamoxing 启动脚本里的 `--port`，并同步改云端
   隧道映射（见第 10 节）
 - **无 GPU 机器**：TTS 自动降级 CPU（慢但可用），对话不受影响
 - **凭据**：登录网关口令、Open WebUI 管理员口令、隧道 token 都是本机私有，换机重新设置
@@ -205,7 +205,7 @@ schtasks /Create /TN "ZhiYinBackup" /TR "<项目根>\yumingbushu\backup_webui.ba
 ## 10. 修改域名映射（换子域名 / 换端口）
 
 1. https://dash.cloudflare.com → Zero Trust → Networks → Tunnels → 你的隧道
-2. Public Hostname → Edit：改子域名，或把 URL 从 `localhost:8291` 改成新目标
+2. Public Hostname → Edit：改子域名，或把 URL 从 `localhost:8088` 改成新目标
 3. 保存后约 30 秒生效，**无需动本机**
 
 ## 11. 安全建议（强烈建议）
@@ -222,10 +222,10 @@ schtasks /Create /TN "ZhiYinBackup" /TR "<项目根>\yumingbushu\backup_webui.ba
 | 检查项 | 结果 |
 |---|---|
 | cloudflared 服务状态 | RUNNING / 前台窗口 |
-| 本机 8088 / 8291 / 8290 | 全部可访问 |
+| 本机 8088 / 8089 / 8290 | 全部可访问 |
 | 手机流量访问 https://nas.905283.xyz | 登录成功并进入「知音」 |
 | 计划任务 ZhiYinHealthCheck / ZhiYinBackup | 已创建 / 已触发 |
-| 健康检查自动拉起 | 停止 8088 后 5 分钟内自动恢复 |
+| 健康检查自动拉起 | 停止 8089 后 5 分钟内自动恢复 |
 | 备份恢复演练 | webui.db 备份可覆盖还原 |
 
 ### 2026-09-07 工作台并入 duihuamoxing + 迁移收尾（实测通过）
@@ -234,7 +234,7 @@ schtasks /Create /TN "ZhiYinBackup" /TR "<项目根>\yumingbushu\backup_webui.ba
 |---|---|
 | cloudflared 服务 | RUNNING，BINARY_PATH 已重注册到 `duihuamoxing\yumingbushu\cloudflared\`（finalize_move.ps1） |
 | 计划任务 | ZhiYinBackup / ZhiYinHealthCheck 均已重指向新目录（HealthCheck 保持原 Disabled 状态） |
-| 本机 8088 / 8291 / 8290 | 全部可访问；网关登录 302/401/cookie/代理页面 端到端通过 |
+| 本机 8088 / 8089 / 8290 | 全部可访问；网关登录 302/401/cookie/代理页面 端到端通过 |
 | 公网 https://nas.905283.xyz | HTTP 200（隧道重启后约 1 分钟内恢复） |
 | 备份 | backup_webui.bat 实测出 webui_20260906_524.db；今晨自动备份 300.db 已抢救迁入 |
 | 旧目录 D:\xm\yumingbushu | 已删除（与 gitee 远程同步，无未推送内容） |

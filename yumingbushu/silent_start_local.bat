@@ -22,7 +22,7 @@ if %errorlevel% neq 0 (
 )
 
 rem --- Open WebUI ---
-powershell -NoProfile -Command "try { Invoke-RestMethod -Uri 'http://localhost:8088/health' -TimeoutSec 3 | Out-Null; exit 0 } catch { exit 1 }" >nul 2>&1
+powershell -NoProfile -Command "try { Invoke-RestMethod -Uri 'http://localhost:8089/health' -TimeoutSec 3 | Out-Null; exit 0 } catch { exit 1 }" >nul 2>&1
 if %errorlevel% equ 0 exit /b 0
 
 set "DATA_DIR=%PROJECT%\data\open-webui"
@@ -41,5 +41,5 @@ set "ENABLE_MEMORY_BACKGROUND_REVIEW=false"
 set "WHISPER_LANGUAGE=zh"
 set "WHISPER_MODEL=small"
 if not exist "%PROJECT%\log" mkdir "%PROJECT%\log"
-powershell -NoProfile -Command "$env:OPENAI_API_KEY='ollama'; $proc = Start-Process -FilePath '%WEBUI_EXE%' -WorkingDirectory '%PROJECT%' -ArgumentList 'serve','--port','8088','--host','0.0.0.0' -WindowStyle Minimized -PassThru -RedirectStandardOutput '%PROJECT%\log\webui.log' -RedirectStandardError '%PROJECT%\log\webui.err.log'"
+powershell -NoProfile -Command "$env:OPENAI_API_KEY='ollama'; $proc = Start-Process -FilePath '%WEBUI_EXE%' -WorkingDirectory '%PROJECT%' -ArgumentList 'serve','--port','8089','--host','0.0.0.0' -WindowStyle Minimized -PassThru -RedirectStandardOutput '%PROJECT%\log\webui.log' -RedirectStandardError '%PROJECT%\log\webui.err.log'"
 exit /b 0

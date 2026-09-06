@@ -171,12 +171,15 @@ cd gptsovits\GPT-SoVITS
 | 只启数字人 | `数字人\启动.bat` |
 | 只启朗读 | `文字驱动语音\启动.bat`（需已有引擎+模型） |
 | 查看状态 | `状态.bat` |
-| **公网上线** | 双击 `公网上线.bat`（= 本地服务 → 登录网关 8291 → Cloudflare Tunnel，隧道步骤弹 UAC；需 `yumingbushu\cloudflared\` 已备好 cloudflared.exe + token，详见 `yumingbushu\README.md`） |
+| **公网上线** | 双击 `公网上线.bat`（= 本地服务 → 登录网关 8088 → Cloudflare Tunnel，隧道步骤弹 UAC；需 `yumingbushu\cloudflared\` 已备好 cloudflared.exe + token，详见 `yumingbushu\README.md`） |
 | 公网下线 | 双击 `公网下线.bat`（先关隧道再关服务） |
 | 公网状态 | 双击 `公网状态.bat`（四服务 + 隧道 + 外网可达性体检） |
 
-**首次打开对话界面**：http://localhost:8088 → 创建管理员账号并登录（WEBUI_AUTH=True），
-顶部模型选 `qwen2.5:7b` 即可对话。
+**首次打开对话界面**：本机直连 http://localhost:8089（Open WebUI）→ 创建管理员账号并登录
+（WEBUI_AUTH=True），顶部模型选 `qwen2.5:7b` 即可对话。
+
+> 端口分工（2026-09-07 起）：**8088 = 登录网关**（公网上线时的统一入口，云端隧道映射的
+> `localhost:8088` 指向它，无需改云端）；**8089 = Open WebUI 本机直连**；8291 已停用。
 
 **公网访问验证**：手机关 Wi-Fi 用流量打开 https://nas.905283.xyz → 先见登录网关登录页
 （口令在 `yumingbushu\login_gateway\config.json`，不入库），登录后即「知音」。
@@ -221,7 +224,7 @@ powershell -ExecutionPolicy Bypass -File .\tests\test_rag_chat.ps1
 | 项 | 本机默认 | 说明 |
 |----|----------|------|
 | 仓库位置 | 任意 | 脚本全部 `%~dp0` 相对定位，可整体移动 |
-| 端口 | 8088 / 11434 / 48620 / 8061 | 被占用时改对应启动脚本/环境变量（`AVATAR_PORT`、`TTS_API_PORT` 等） |
+| 端口 | 8088 / 8089 / 11434 / 48620 / 8061 | 被占用时改对应启动脚本/环境变量（`AVATAR_PORT`、`TTS_API_PORT` 等） |
 | Open WebUI 账号 | 首次创建 | 管理员账号密码由你设定，不写死在仓库 |
 | Ollama 模型目录 | `data\ollama\models` | 由启动脚本 `OLLAMA_MODELS` 指向；迁移时整个 `data\` 带走 |
 | 显存 | 自动 | 对话/TTS 按显存选 cuda/cpu；<10GB 时 TTS 自动 CPU |
@@ -233,11 +236,11 @@ powershell -ExecutionPolicy Bypass -File .\tests\test_rag_chat.ps1
 
 - **`启动.bat` 提示 Ollama not found**：Ollama 没装或不在 `%LOCALAPPDATA%\Programs\Ollama\`。
 - **Ollama 一直"就绪检测失败"**：多半是模型没拉到 `data\ollama\models`（见第 2 节）；或托盘 Ollama 占用 11434（禁用自启后重试）。
-- **Open WebUI 起不来**：看 `log\webui.err.log`；端口 8088 被占换端口（改 `启动.bat` 的 `--port`）。
+- **Open WebUI 起不来**：看 `log\webui.err.log`；端口 8089 被占换端口（改 `启动.bat` 的 `--port`）。
 - **朗读自动变系统语音**：8061 未启动或 `tts_service\models\` 无完整角色（4 件套）；先看 `log\tts.err.log`。
 - **数字人素材库为空**：素材需自己建库（第 6 节），仓库不含真人素材。
 - **首次对话/朗读慢**：模型冷加载（qwen 1~3 分钟、某音色首次 10~25 秒），属正常；启动脚本已自动预热默认音色。
-- **代理/杀软拦截**：本项目全本地端口，可加防火墙例外：8088/11434/48620/8061。
+- **代理/杀软拦截**：本项目全本地端口，可加防火墙例外：8088/8089/11434/48620/8061。
 
 ---
 

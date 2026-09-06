@@ -101,7 +101,7 @@ def index():
 @app.get('/api/status')
 def api_status():
     ports = {}
-    for p in (8088, 11434, 48620, 8061):
+    for p in (8088, 8089, 11434, 48620, 8061):
         ports[str(p)] = port_up(p)
 
     svc = _run(['sc', 'query', 'cloudflared'])
@@ -165,7 +165,7 @@ def api_diag():
         info.append(f'Time: {time.strftime("%Y-%m-%d %H:%M:%S")}')
         info.append('')
         info.append('--- Ports ---')
-        for p in (8088, 11434, 48620, 8061):
+        for p in (8088, 8089, 11434, 48620, 8061):
             info.append(f'port {p}: {"UP" if port_up(p) else "DOWN"}')
         info.append('')
         info.append('--- Tunnel ---')

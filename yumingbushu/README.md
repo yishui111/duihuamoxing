@@ -19,7 +19,7 @@
 本目录是 **duihuamoxing（知音 ZhiYin：Open WebUI 对话 + 知识库 + Ollama 大模型 + 数字人 + 朗读 TTS）的「公网部署工作台」**，已并入 duihuamoxing 仓库、作为其子目录 `yumingbushu/` 存在（原为同级兄弟仓库，2026-09-06 起合并）。负责三件事：
 
 1. **开隧道**：用 Cloudflare Tunnel（连接器主动外连）把本机服务发布到公网 `https://nas.905283.xyz`，**不需要公网 IP、不需要路由器端口映射**；
-2. **加登录**：入口前挡一层自研登录网关（`login_gateway`，8291，反向代理 Open WebUI 8088），账号密码放在不入库的 `config.json` 里；
+2. **加登录**：入口前挡一层自研登录网关（`login_gateway`，8088，反向代理 Open WebUI 8089），账号密码放在不入库的 `config.json` 里；
 3. **看状态**：自研运维面板（`ops_dashboard`，8290，仅本机访问），实时监控四个服务 + 隧道、查看日志、一键打包诊断。
 
 换机器部署时，整个 `duihuamoxing` 文件夹拷走即可（本目录随仓库一起走），按 `DEPLOY.md` 准备 `cloudflared.exe`、隧道 token、网关口令即可，隧道配置（域名映射）在云端、换机无需重配。日常入口用仓库根目录的 **`公网上线.bat` / `公网下线.bat` / `公网状态.bat`**（分别调用本目录 `start.bat` / `stop.bat` / `check_status.bat`）。
@@ -28,7 +28,7 @@
 
 ## 🎯 主要功能
 
-- 🔐 **自研登录网关**（`login_gateway/`，127.0.0.1:8291）：自绘登录页 + HMAC 签名会话 Cookie，登录后才转发 HTTP / WebSocket 到 Open WebUI（8088）；凭据只来自 `config.json`（不入库），缺配置即报错拒绝启动，**绝无内置默认口令**
+- 🔐 **自研登录网关**（`login_gateway/`，127.0.0.1:8088）：自绘登录页 + HMAC 签名会话 Cookie，登录后才转发 HTTP / WebSocket 到 Open WebUI（8089）；凭据只来自 `config.json`（不入库），缺配置即报错拒绝启动，**绝无内置默认口令**
 - 🖥️ **自研运维面板**（`ops_dashboard/`，127.0.0.1:8290）：状态卡片（对话/Ollama/数字人/TTS + 隧道）、GPU 显存与磁盘进度条、进程内存列表、8 个日志在线查看、一键生成诊断包
 - 🚇 **Cloudflare Tunnel 集成**：`start_cloudflared_2.bat` / `stop_cloudflared_1.bat` 管理隧道服务，支持开机自启（Windows 服务）
 - ▶️ **成套启停脚本**：`start.bat`/`stop.bat` 总入口 + 分步 `start_local_services_1.bat` → `start_login_gateway.bat` → `start_cloudflared_2.bat`（口诀：**先内容后通道 / 先通道后内容**）
@@ -40,7 +40,7 @@
 
 ```
 duihuamoxing\yumingbushu\            ← 本目录（部署工作台，duihuamoxing 的子目录）
-├── login_gateway/            # 自研登录网关（8291，反向代理 8088）
+├── login_gateway/            # 自研登录网关（8088，反向代理 8089）
 │   ├── main.py               # 网关代码（Python/FastAPI）
 │   ├── config.json.example   # 配置模板：复制为 config.json 后填强密码
 │   └── config.json           # （自建，不入库）网关账号口令
@@ -122,16 +122,16 @@ cd duihuamoxing    # 工作台在 yumingbushu\ 子目录，随仓库一起到
 | 步骤 | 操作 | 说明 |
 |---|---|---|
 | 1 | 双击 `start_local_services_1.bat` | 启动本地服务（Open WebUI/Ollama/数字人/TTS），等 1-3 分钟模型加载 |
-| 2 | 双击 `start_login_gateway.bat` | 启动登录网关（127.0.0.1:8291） |
+| 2 | 双击 `start_login_gateway.bat` | 启动登录网关（127.0.0.1:8088） |
 | 3 | 双击 `start_cloudflared_2.bat` | 启动隧道（UAC 点「是」），自动打开 https://nas.905283.xyz |
 
 **一键下线**：双击 `stop.bat`（= 隧道 → 登录网关 → 本地服务）。分步则先 `stop_cloudflared_1.bat` 再 `stop_login_gateway.bat` 再 `stop_local_services_2.bat`。
 
-> 「本地服务」= 对话系统本体（相当于厨房）；隧道 = 大门。门开着厨房没火，外网会显示 502 —— 先确认 http://localhost:8088 能打开，再查隧道。
+> 「本地服务」= 对话系统本体（相当于厨房）；隧道 = 大门。门开着厨房没火，外网会显示 502 —— 先确认 http://localhost:8089 能打开，再查隧道。
 
 ### 5. 验证
 
-- 本机浏览器打开 http://localhost:8088（Open WebUI）与 http://127.0.0.1:8291（登录网关登录页）
+- 本机浏览器打开 http://localhost:8089（Open WebUI）与 http://127.0.0.1:8088（登录网关登录页）
 - 运维面板 http://127.0.0.1:8290 四服务 + 隧道全绿
 - **用手机流量**（关 Wi-Fi）打开 https://nas.905283.xyz → 先见登录页，登录后进入「知音」，即部署成功
 
@@ -141,7 +141,7 @@ cd duihuamoxing    # 工作台在 yumingbushu\ 子目录，随仓库一起到
 | ---- | ---- | ---- |
 | cloudflared.exe（约 52MB） | Cloudflare 隧道连接器 | https://github.com/cloudflare/cloudflared/releases （windows-amd64.exe，改名 `cloudflared.exe` 放入 `cloudflared\`） |
 | 隧道 Token | 连接你账号下的隧道 | Cloudflare 控制台 → Zero Trust → Networks → Tunnels → Configure → 复制 Token → 存入 `cloudflared\tunnel-token.txt` |
-| 系统本体 duihuamoxing（几十 GB 大件） | Open WebUI 8088 / Ollama 11434 / 数字人 48620 / TTS 8061 | 本目录的父目录即是；大件按 duihuamoxing 的 DEPLOY.md 准备 |
+| 系统本体 duihuamoxing（几十 GB 大件） | Open WebUI 8089 / Ollama 11434 / 数字人 48620 / TTS 8061 | 本目录的父目录即是；大件按 duihuamoxing 的 DEPLOY.md 准备 |
 
 ## 🛠️ 本地开发 & 提交
 
@@ -151,12 +151,12 @@ git commit -m "feat: xxx"
 git push origin main
 ```
 
-- 网关/面板是标准 FastAPI 应用：`python -m uvicorn main:app --host 127.0.0.1 --port 8291 --app-dir login_gateway`（8290 同理）
+- 网关/面板是标准 FastAPI 应用：`python -m uvicorn main:app --host 127.0.0.1 --port 8088 --app-dir login_gateway`（8290 同理）
 - 依赖：`fastapi`、`uvicorn`、`httpx`、`websockets`（通常由 duihuamoxing 的 venv 提供）
 
 ## ❓ 常见问题（FAQ）
 
-- **Q：外网 502 / 打不开？** A：先看本机 http://localhost:8088 是否正常（本地服务没起则 502）；再 `sc query cloudflared` 看隧道是否 RUNNING；最后 `collect_logs.bat` 打包日志排查。
+- **Q：外网 502 / 打不开？** A：先看本机 http://localhost:8089 是否正常（本地服务没起则 502）；再 `sc query cloudflared` 看隧道是否 RUNNING；最后 `collect_logs.bat` 打包日志排查。
 - **Q：start_cloudflared_2.bat 报 cloudflared.exe / token 找不到？** A：按上文「配置」第 2、3 步准备 `cloudflared\cloudflared.exe` 与 `cloudflared\tunnel-token.txt`，它们不入库，新机器要自己放。
 - **Q：登录网关启动报 FATAL config.json？** A：复制 `login_gateway\config.json.example` 为 `login_gateway\config.json` 并填写强密码 —— 网关刻意不允许空密码/默认密码。
 - **Q：脚本报错说找不到 duihuamoxing / project root？** A：本目录必须位于 `duihuamoxing\yumingbushu\`（父目录即项目根）；整个文件夹被移出项目外就会找不到。

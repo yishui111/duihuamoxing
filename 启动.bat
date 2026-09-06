@@ -73,13 +73,13 @@ set "ENABLE_MEMORY_SYSTEM_CONTEXT=false"
 set "ENABLE_MEMORY_BACKGROUND_REVIEW=false"
 set "WHISPER_LANGUAGE=zh"
 set "WHISPER_MODEL=small"
-powershell -NoProfile -Command "try { Invoke-RestMethod -Uri 'http://localhost:8088/health' -TimeoutSec 3 | Out-Null; exit 0 } catch { exit 1 }" >nul 2>&1
+powershell -NoProfile -Command "try { Invoke-RestMethod -Uri 'http://localhost:8089/health' -TimeoutSec 3 | Out-Null; exit 0 } catch { exit 1 }" >nul 2>&1
 if %errorlevel% equ 0 (
     echo      Open WebUI already running.
     goto webuiok
 )
 echo      Starting Open WebUI (first start about 30s)...
-powershell -NoProfile -Command "$proc = Start-Process -FilePath '%WEBUI_EXE%' -ArgumentList 'serve','--port','8088','--host','0.0.0.0' -WindowStyle Minimized -PassThru -RedirectStandardOutput '%~dp0log\webui.log' -RedirectStandardError '%~dp0log\webui.err.log'"
+powershell -NoProfile -Command "$proc = Start-Process -FilePath '%WEBUI_EXE%' -ArgumentList 'serve','--port','8089','--host','0.0.0.0' -WindowStyle Minimized -PassThru -RedirectStandardOutput '%~dp0log\webui.log' -RedirectStandardError '%~dp0log\webui.err.log'"
 set /a n=0
 :webuiwait
 set /a n+=1
@@ -87,12 +87,12 @@ if %n% gtr 30 (
     echo  [WARN] Open WebUI start timeout. Check log\webui.err.log.
     goto webuiwarn
 )
-powershell -NoProfile -Command "try { Invoke-RestMethod -Uri 'http://localhost:8088/health' -TimeoutSec 3 | Out-Null; exit 0 } catch { exit 1 }" >nul 2>&1
+powershell -NoProfile -Command "try { Invoke-RestMethod -Uri 'http://localhost:8089/health' -TimeoutSec 3 | Out-Null; exit 0 } catch { exit 1 }" >nul 2>&1
 if %errorlevel% equ 0 goto webuiok
 ping -n 4 127.0.0.1 >nul
 goto webuiwait
 :webuiok
-echo      Open WebUI ready (http://localhost:8088).
+echo      Open WebUI ready (http://localhost:8089).
 :webuiwarn
 
 rem ========== 3. Warm up chat model ==========
@@ -172,9 +172,9 @@ echo      Avatar service ready (choose a person in the avatar menu).
 echo.
 echo  ========================================
 echo    Startup complete!
-echo    Chat UI: http://localhost:8088
+echo    Chat UI: http://localhost:8089
 echo  ========================================
 echo.
-start "" "http://localhost:8088"
+start "" "http://localhost:8089"
 ping -n 11 127.0.0.1 >nul
 exit /b 0

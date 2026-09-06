@@ -13,7 +13,7 @@ Cloudflare Tunnel 的思路是：**让家里的电脑主动向外网发起连接
 
 - **域名（如 905283.xyz）** = 招牌，挂在云端，永不消失
 - **隧道连接器 cloudflared** = 传菜员，负责把外网请求转到你电脑的指定端口
-- **本地服务（如 duihuamoxing，8088/8291 等）** = 厨师，处理请求返回网页
+- **本地服务（如 duihuamoxing，8089/8088 等）** = 厨师，处理请求返回网页
 
 换电脑完全不影响：新机器上重新放好 cloudflared.exe + 同一个 Token，隧道自动接上，
 域名绑定（Public Hostname 映射）在云端，无需重配。
@@ -32,7 +32,7 @@ Cloudflare Tunnel 的思路是：**让家里的电脑主动向外网发起连接
 1. 确认/安装 Python（安装时勾选 Add Python to PATH）
 2. 启动服务（本项目为 duihuamoxing，双击其启动脚本即可；临时验证可用
    `python -m http.server 8080`）
-3. 浏览器访问 http://localhost:8080（本项目是 8088）能看到内容 = 服务本体 OK
+3. 浏览器访问 http://localhost:8080（本项目是 8089）能看到内容 = 服务本体 OK
 4. 可选：在路由器后台给这台电脑做 DHCP 静态保留，固定内网 IP
    （本项目 cloudflared 为主动外连 + Windows 服务，固定 IP 非必需）
 
@@ -61,14 +61,14 @@ Cloudflare Tunnel 的思路是：**让家里的电脑主动向外网发起连接
 - Subdomain：喜欢的名字，如 `nas`
 - Domain：选你的主域名（如 905283.xyz）
 - Type：HTTP
-- URL：目标地址。本项目公网入口走**登录网关**填 `localhost:8291`；
-  若要直连内容系统则填 `localhost:8088`（此时建议开启 Open WebUI 自带登录）
+- URL：目标地址。本项目公网入口走**登录网关**填 `localhost:8088`；
+  若要直连内容系统则填 `localhost:8089`（此时建议开启 Open WebUI 自带登录）
 - 保存后约 30 秒生效
 
-> ⚠️ **端口迁移注意（2026-09-06）**：登录网关已从 8091 迁到 **8291**、运维面板从 8090 迁到 **8290**
-> （避开本机其它项目占用）。如果云端这条 Public Hostname 映射当初填的是 `localhost:8091`，
-> 必须到 Cloudflare Zero Trust → Networks → Tunnels → Public Hostname 里把 URL 改成
-> `localhost:8291` 并保存——否则本地一切正常、外网却一直 502。
+> ✅ **端口体系（2026-09-07 更新）**：登录网关现在就监听 **8088**（= 云端 Public Hostname
+> 映射的 `localhost:8088`），Open WebUI 本机端口为 8089。**云端映射保持 `localhost:8088`
+> 不需要任何改动**，公网访客会先经过登录网关再进入「知音」；只有当云端 URL 被改成了
+> 其它端口（如旧文档里的 8291/8091）时，才需要改回 `localhost:8088`。
 
 > 自测通过标准：**关掉 Wi-Fi，用手机流量**（4G/5G）访问 https://nas.905283.xyz，
 > 看到与本地一致的内容（本方案为登录页 → 登录后进入「知音」）。
@@ -78,7 +78,7 @@ Cloudflare Tunnel 的思路是：**让家里的电脑主动向外网发起连接
 
 1. **（可选）国内访问加速**：Cloudflare 默认走国际节点，国内直连较慢属正常；
    可搜索「Cloudflare 优选 IP」工具自行优化，普通个人使用可暂不处理
-2. **（强烈推荐）加一道登录**：本仓库用自研 `login_gateway`（8291，公网入口登录，
+2. **（强烈推荐）加一道登录**：本仓库用自研 `login_gateway`（8088，公网入口登录，
    口令在不入库的 `login_gateway\config.json`）；内容系统内 Open WebUI 建议再开
    自带登录认证（WEBUI_AUTH=True）
 3. **（可选）Cloudflare Zero Trust Access**：Zero Trust → Access → Applications 给域名

@@ -42,7 +42,7 @@ $svc = Get-Service cloudflared -ErrorAction SilentlyContinue
 W "cloudflared service: $(if ($svc) { "$($svc.Status) / $($svc.StartType)" } else { 'NOT INSTALLED' })"
 W ''
 W '--- Ports ---'
-foreach ($p in 8088,11434,48620,8061) {
+foreach ($p in 8088,8089,11434,48620,8061) {
     $c = Get-NetTCPConnection -State Listen -LocalPort $p -ErrorAction SilentlyContinue
     W "port $p : $(if ($c) { "LISTEN (pid $($c[0].OwningProcess))" } else { 'DOWN' })"
 }

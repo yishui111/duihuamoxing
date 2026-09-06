@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 """ZhiYin Login Gateway - a fresh, self-written login gate in front of Open WebUI.
 
-Listens on 127.0.0.1:8291. Users must sign in with the configured account
+Listens on 127.0.0.1:8088. Users must sign in with the configured account
 (password from config.json). Once signed in (signed cookie), all HTTP and
-WebSocket traffic is proxied to Open WebUI on 127.0.0.1:8088.
+WebSocket traffic is proxied to Open WebUI on 127.0.0.1:8089.
 
 The login page here is written from scratch: no email validation, no
 framework quirks - just a clean account + password form.
@@ -25,8 +25,8 @@ BASE = Path(__file__).parent
 CONFIG_FILE = BASE / 'config.json'
 COOKIE_NAME = 'zhiyin_session'
 COOKIE_TTL = 60 * 60 * 24 * 7  # 7 days
-BACKEND = 'http://127.0.0.1:8088'
-BACKEND_WS = 'ws://127.0.0.1:8088'
+BACKEND = 'http://127.0.0.1:8089'
+BACKEND_WS = 'ws://127.0.0.1:8089'
 
 # session signing secret (persisted so restarts keep sessions valid)
 SECRET_FILE = BASE / '.secret'
@@ -239,4 +239,4 @@ async def websockets_connect(url):
 
 
 if __name__ == '__main__':
-    uvicorn.run(app, host='127.0.0.1', port=8291)
+    uvicorn.run(app, host='127.0.0.1', port=8088)
