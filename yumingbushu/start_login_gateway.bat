@@ -15,9 +15,8 @@ if not exist "%~dp0login_gateway\config.json" (
     echo Copy login_gateway\config.json.example to login_gateway\config.json and set a strong password.
     exit /b 1
 )
-rem Self-heal: if something squats 8088 (e.g. a WebUI launched with the old port),
-rem clear it first so the gateway always gets its port.
-powershell -NoProfile -Command "$c = Get-NetTCPConnection -LocalPort 8088 -State Listen -ErrorAction SilentlyContinue; if ($c) { $c | Select-Object -ExpandProperty OwningProcess -Unique | ForEach-Object { $p = Get-CimInstance Win32_Process -Filter \"ProcessId=$_\" -ErrorAction SilentlyContinue; if ($p -and $p.CommandLine -notmatch 'uvicorn') { Write-Host ('Clearing port 8088 squatter PID ' + $_); Stop-Process -Id $_ -Force } } }"
+rem Self-heal: clear any squatter on 8088 (e.g. a WebUI launched with the old port)
+powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0self_heal_8088.ps1"
 timeout /t 2 /nobreak >nul
 echo Starting ZhiYin Login Gateway...
 start "ZhiYin-LoginGateway" "%PYEXE%" -m uvicorn main:app --host 127.0.0.1 --port 8088 --app-dir "%~dp0login_gateway"

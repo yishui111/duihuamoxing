@@ -16,7 +16,14 @@ echo.
 echo [3/3] Starting cloudflared tunnel...
 call "%~dp0start_cloudflared_2.bat"
 echo.
-echo Done. External access: https://nas.905283.xyz
+sc query cloudflared | findstr /i "RUNNING" >nul 2>&1
+if %errorlevel% equ 0 (
+    echo Done. Tunnel RUNNING - public access: https://nas.905283.xyz
+) else (
+    echo [WARN] Tunnel is NOT running (UAC declined? or cloudflared.exe/token missing).
+    echo        Local services are up, but PUBLIC ACCESS IS OFFLINE.
+    echo        Fix: run start_cloudflared_2.bat again and click YES on the UAC prompt.
+)
 echo.
 pause
 exit /b 0
