@@ -1,4 +1,4 @@
-﻿# RAG 知识库功能测试（原生版：Ollama + Open WebUI 8088）
+﻿# RAG 知识库功能测试（原生版：Ollama + Open WebUI 8089）
 # 用法: powershell -ExecutionPolicy Bypass -File .\tests\test_rag_chat.ps1
 # 环境变量（可选）:
 #   OWUI_EMAIL / OWUI_PASSWORD   Open WebUI 登录账号；提供后才测试「登录+界面对话」
@@ -68,9 +68,9 @@ try {
     $results += 'Chat-FAIL'
 }
 
-# 4. Open WebUI 健康（8088）
+# 4. Open WebUI 健康（8089）
 try {
-    $h = Invoke-RestMethod -Uri 'http://localhost:8088/health' -TimeoutSec 5
+    $h = Invoke-RestMethod -Uri 'http://localhost:8089/health' -TimeoutSec 5
     Write-Log "[4/6] Open WebUI /health: OK ($($h.status))"
     $results += 'WebUI'
 } catch {
@@ -86,7 +86,7 @@ if ($email -and $pw) {
         $authBody = @{ email = $email }
         $authBody['password'] = $pw
         $body = $authBody | ConvertTo-Json
-        $auth = Invoke-RestMethod -Uri 'http://localhost:8088/api/v1/auths/signin' -Method Post -ContentType 'application/json' -Body $body -TimeoutSec 10
+        $auth = Invoke-RestMethod -Uri 'http://localhost:8089/api/v1/auths/signin' -Method Post -ContentType 'application/json' -Body $body -TimeoutSec 10
         if ($auth.token) {
             Write-Log "[5/6] 登录认证: OK (user=$($auth.email) role=$($auth.role))"
             $results += 'Auth'
@@ -103,7 +103,7 @@ if ($email -and $pw) {
         try {
             $headers = @{ Authorization = "Bearer $($script:jwt)" }
             $body = @{ model = 'qwen2.5:7b'; messages = @(@{ role = 'user'; content = '请只回复两个字：收到' }) } | ConvertTo-Json -Depth 5
-            $resp = Invoke-WebRequest -Uri 'http://localhost:8088/api/chat/completions' -Method Post -Headers $headers -ContentType 'application/json' -Body $body -TimeoutSec 120 -UseBasicParsing
+            $resp = Invoke-WebRequest -Uri 'http://localhost:8089/api/chat/completions' -Method Post -Headers $headers -ContentType 'application/json' -Body $body -TimeoutSec 120 -UseBasicParsing
             $chat = [System.Text.Encoding]::UTF8.GetString($resp.RawContentStream.ToArray()) | ConvertFrom-Json
             $reply = $chat.choices[0].message.content
             if ($reply) {
@@ -125,7 +125,7 @@ if ($email -and $pw) {
 
 # 6. 语音输入接口（Whisper STT 端点存在性：应返回 400/415 而非 404）
 try {
-    $r = Invoke-WebRequest -Uri 'http://localhost:8088/api/v1/audio/transcriptions' -Method Post -ContentType 'multipart/form-data' -Body 'x' -TimeoutSec 10 -UseBasicParsing
+    $r = Invoke-WebRequest -Uri 'http://localhost:8089/api/v1/audio/transcriptions' -Method Post -ContentType 'multipart/form-data' -Body 'x' -TimeoutSec 10 -UseBasicParsing
     Write-Log "[6/6] 语音接口: OK (HTTP $($r.StatusCode))"
     $results += 'STT'
 } catch {
