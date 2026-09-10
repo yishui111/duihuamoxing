@@ -6,7 +6,7 @@ echo   ZhiYin Status Check
 echo ============================================
 echo.
 echo [1/4] Local services (ports):
-powershell -NoProfile -Command "$p=@(8088,8089,11434,48620,8061); foreach($x in $p){ $c=Get-NetTCPConnection -State Listen -LocalPort $x -ErrorAction SilentlyContinue; if($c){ Write-Host ('  port {0} : OK' -f $x) } else { Write-Host ('  port {0} : DOWN' -f $x) } }"
+powershell -NoProfile -Command "$p=@(8088,8089,11434,48620,18060); foreach($x in $p){ $c=Get-NetTCPConnection -State Listen -LocalPort $x -ErrorAction SilentlyContinue; if($c){ Write-Host ('  port {0} : OK' -f $x) } else { Write-Host ('  port {0} : DOWN' -f $x) } }"
 echo.
 echo [2/4] Open WebUI health:
 powershell -NoProfile -Command "try { $r=Invoke-RestMethod -Uri 'http://localhost:8089/health' -TimeoutSec 5; Write-Host ('  status: ' + $r.status) } catch { Write-Host '  FAIL' }"

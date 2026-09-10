@@ -24,7 +24,7 @@
 |--------|------|------|------|
 | 对话系统 | 8089 / 11434 | 本地大模型对话 + RAG 知识库（Open WebUI + Ollama） | 启动脚本 + 前端增强 `loader.js` |
 | 数字人 | 48620 | 数字人素材服务：说话视频 → 嘴型图库、声音驱动嘴型 | **自研** `avatar_server.py`（纯 Python 标准库） |
-| 文字驱动语音 | 8061 | 文字 → 训练音色语音合成（GPT-SoVITS OpenAI 兼容封装） | **自研** `tts_service/tts_api.py`（FastAPI） |
+| 文字驱动语音 | 18060 | 文字 → 训练音色语音合成（GPT-SoVITS OpenAI 兼容封装） | **自研** `tts_service/tts_api.py`（FastAPI） |
 | 公网部署工作台 `yumingbushu/` | 8088 / 8290 | Cloudflare Tunnel 发布公网 + 自研登录网关 + 运维面板 | **自研** `login_gateway/`、`ops_dashboard/` |
 
 - **适合谁**：想在本机搭一套私有 AI 助理、不想把聊天/资料/声音发给云端、又想要"看得见、听得见"的完整体验的用户。
@@ -49,7 +49,7 @@
 duihuamoxing/
 ├── 对话系统/            # 子项目 1：Open WebUI(8089) + Ollama(11434)，含启动/关闭.bat
 ├── 数字人/              # 子项目 2：数字人素材服务(48620)，自研 avatar_server.py + avatar_core/avatar_web
-├── 文字驱动语音/         # 子项目 3：GPT-SoVITS 朗读服务(8061)，自研 tts_service/tts_api.py
+├── 文字驱动语音/         # 子项目 3：GPT-SoVITS 朗读服务(18060)，自研 tts_service/tts_api.py
 ├── yumingbushu/         # 公网部署工作台：cloudflared 隧道脚本 + 自研登录网关(8088) + 运维面板(8290)，见其 README/DEPLOY
 ├── 共享资源/            # 公共依赖（venv/runtime/data 在仓库根共享）说明
 ├── tools/               # 人格蒸馏 / 带记忆对话 / 角色管理（自研，纯标准库）
@@ -132,7 +132,7 @@ git push origin main
 
 - **Q：启动报「Open WebUI not found (venv not installed)」？** A：还没有创建 `venv` 并安装 open-webui，按 `DEPLOY.md` 第 4 节执行。
 - **Q：对话 401 / 没反应？** A：浏览器按 `Ctrl+Shift+R` 强刷（loader.js 更新后需要）；仍不行则重新登录一次。
-- **Q：朗读变成系统自带声音？** A：内置朗读服务（8061）未启动或音色模型缺失。先启动 `文字驱动语音\启动.bat`，并确认 `tts_service\models\` 下有完整角色模型（4 件套）。
+- **Q：朗读变成系统自带声音？** A：内置朗读服务（18060）未启动或音色模型缺失。先启动 `文字驱动语音\启动.bat`，并确认 `tts_service\models\` 下有完整角色模型（4 件套）。
 - **Q：数字人画面不出现？** A：确认数字人服务（48620）已启动、页面已强刷；在数字人菜单里选人物（素材需先用建库工具生成）。
 - **Q：显存不够？** A：Ollama 单并发 + 显存预留已调优；8GB 显卡时 TTS 会自动 CPU 推理；模型太大可换 `qwen2.5:3b`。
 - **Q：能联网吗？** A：本项目离线优先（OFFLINE_MODE=true），除首次下载模型外不依赖公网；DeepSeek 人格蒸馏等外部引擎需自行配 Key。

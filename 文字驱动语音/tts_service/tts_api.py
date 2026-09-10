@@ -40,7 +40,7 @@ PROJECT_ROOT = os.path.dirname(SCRIPT_DIR)
 GSV_ROOT = os.environ.get("GSV_ROOT") or os.path.join(PROJECT_ROOT, "gptsovits", "GPT-SoVITS")
 # 解耦：模型直接发布到本项目的模型目录（训练中心-文字驱动模式发布到这里），本服务自己读自己的模型
 GSV_MODELS_DIR = os.environ.get("GSV_MODELS_DIR", os.path.join(SCRIPT_DIR, "models"))
-API_PORT = int(os.environ.get("TTS_API_PORT", "8060"))
+API_PORT = int(os.environ.get("TTS_API_PORT", "18060"))
 # 推理设备：cuda（默认，需显卡）或 cpu（不吃显存，适合 8G 显卡与 LLM 同机跑）
 TTS_DEVICE = (os.environ.get("TTS_DEVICE", "cuda") or "cuda").strip().lower()
 if TTS_DEVICE not in ("cuda", "cpu"):

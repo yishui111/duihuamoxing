@@ -240,8 +240,8 @@ window.__dsh_wrapFetch = (function () {
   });
 })();
 
-// ===== 系统语音朗读优化 + 回退（2026-08-15 增强，2026-08-22 更新为内置 8061）=====
-// 背景1：Open WebUI 的 TTS 已指向本项目内置朗读服务 8061（GPT-SoVITS 训练音色）。
+// ===== 系统语音朗读优化 + 回退（2026-08-15 增强，2026-08-22 更新为内置 18060）=====
+// 背景1：Open WebUI 的 TTS 已指向本项目内置朗读服务 18060（GPT-SoVITS 训练音色）。
 //  当该服务未启动/失败时，后端 /api/v1/audio/speech 会报错，界面只有红字。
 //  本段检测到朗读请求失败，自动改用浏览器系统语音朗读同样文本 + 提示条。
 // 背景2：系统语音默认较机械（桌面版语音/不洗文本）。本段做三件事：
@@ -377,7 +377,7 @@ window.__dsh_wrapFetch = (function () {
     if (tipEl2) return;
     tipEl2 = document.createElement("div");
     tipEl2.id = "dsh-tts-fallback-tip";
-    tipEl2.textContent = "🔇 内置朗读语音服务（8061）未启动，本次朗读已改用系统语音。如需训练音色，请按《文字驱动语音\\模型放置与使用.md》把角色模型放入 tts_service\\models\\ 并启动该服务";
+    tipEl2.textContent = "🔇 内置朗读语音服务（18060）未启动，本次朗读已改用系统语音。如需训练音色，请按《文字驱动语音\\模型放置与使用.md》把角色模型放入 tts_service\\models\\ 并启动该服务";
     tipEl2.setAttribute("role", "status");
     var s = tipEl2.style;
     s.position = "fixed";
@@ -436,7 +436,7 @@ window.__dsh_wrapFetch = (function () {
 
   window.__dsh_wrapFetch(function (promise, url, method, init) {
     if (isTtsRequest(url) && method === "POST") {
-      // 拿朗读文本（8061 未启动时用系统语音朗读）
+      // 拿朗读文本（18060 未启动时用系统语音朗读）
       var fallbackText = parseInputText(init && init.body);
       // 音色加载提示：10 秒无数据（换音色首次要加载模型）时显示提示条。
       // 用 clone 读流判断首数据，绝不读原响应体（否则会破坏 Open WebUI 播放）。
@@ -444,7 +444,7 @@ window.__dsh_wrapFetch = (function () {
       var voiceDone = false;
       promise.then(function (res) {
         if (!res || !res.ok) {
-          // 内置朗读服务（8061）未启动：改用系统自带语音朗读
+          // 内置朗读服务（18060）未启动：改用系统自带语音朗读
           clearTimeout(voiceTimer);
           hideVoiceLoadingTip();
           try { if (window.__dshLogUI) window.__dshLogUI("朗读", "TTS请求失败(HTTP " + (res && res.status) + ")，回退系统语音，文本: " + String(fallbackText).slice(0, 50)); } catch (e) {}

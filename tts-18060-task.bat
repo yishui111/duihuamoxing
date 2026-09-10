@@ -1,6 +1,6 @@
 @echo off
-rem TTS 语音服务启动器（8061）：由任务计划调用，带环境变量
-set "TTS_API_PORT=8060"
+rem TTS 语音服务启动器（18060）：由任务计划调用，带环境变量
+set "TTS_API_PORT=18060"
 set "GSV_MODELS_DIR=D:\xm\duihuamoxing\文字驱动语音\tts_service\models"
 set "TTS_DEFAULT_VOICE=azhong"
 set "TTS_DEVICE=cuda"
