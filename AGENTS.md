@@ -43,3 +43,7 @@ venv/、runtime/、data/（open-webui 库/用户数据/ollama 模型）、log/�
 - TTS 端口统一 18060（原任务通道 8060/手动通道 8061 合并），WebUI 数据库 audio.tts.openai.api_base_url 已同步；AIRI 侧 TTS 地址仍指 8060，需用户在 AIRI 设置自行改 http://127.0.0.1:18060/v1
 - 8088 端口不可改：cloudflared 云端（token 远程管理）映射指向 localhost:8088，改本地网关端口会断公网
 - 8088 上的 open-webui = NightGate 复活的旧实例抢占，与登录网关无关；再见到直接杀即可，不会再被复活
+### 关键点（2026-09-11 朗读英文 500 修复 + 冒烟测试）
+- **朗读含英文字母必 500 的坑**：文本含英文（AI/OK/Hello/中英混排）时 GPT-SoVITS 走 `GPT_SoVITS\text\english.py` → `g2p_en` → nltk `cmudict`；`runtime\py312\nltk_data` 下缺 `corpora/cmudict` 就 `LookupError: Resource 'cmudict' not found` → HTTP 500。纯中文走不到该分支，所以表现为 `/tts` 正常而 `/v1/audio/speech`（Open WebUI 实际朗读通道）挂掉，容易误判。已补 `corpora/cmudict` + `taggers/averaged_perceptron_tagger_eng`（后者原本就在，是之前只修了一半）。
+- 新增 `scripts\setup_nltk_data.py`（幂等：先复制本机 `%APPDATA%\nltk_data`，再联网下载，最后校验 g2p_en）。`runtime\` 不入库，**换机器必须重跑**；DEPLOY.md 第 4 节第 5 步与第 11 节排查已记录。
+- 新增 `tests\smoke_e2e.py`：四服务端到端冒烟（Ollama 真推理 / WebUI health+config+首页 / 数字人 libs+页面 / TTS wav+OpenAI 兼容 mp3），产物落 `tests\_smoke_out\`。

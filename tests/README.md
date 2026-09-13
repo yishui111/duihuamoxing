@@ -4,11 +4,17 @@
 
 | 文件 | 作用 | 运行前提 |
 |------|------|----------|
+| `smoke_e2e.py` | **四服务端到端冒烟**（只走真实 HTTP）：Ollama 对话真推理 / WebUI health+config+首页 / 数字人 libs+页面 / TTS 训练音色 wav + OpenAI 兼容 mp3 | 四服务已启动；产物落 `tests\_smoke_out\` |
 | `test_rag_chat.ps1` | 对话系统自检：Ollama 模型、bge-m3 嵌入、对话、Open WebUI 健康、登录/界面对话、语音端点 | Ollama + Open WebUI(8088) 已启动 |
 | `loader_fetch_test.mjs` | 验证 loader.js fetch 包装 clone 修复（body stream already read） | Open WebUI 已启动 + 已注入 loader.js |
 | `avatar_sync_test.js` | 数字人嘴型同步 e2e（采样嘴部像素验证嘴巴随声音动） | 对话系统+数字人已启动 + 本机 Chrome |
 
 ## 运行
+
+```bash
+# 四服务一键冒烟（推荐先跑这个，纯 HTTP，无需账号）
+venv\Scripts\python.exe tests\smoke_e2e.py
+```
 
 ```powershell
 # Windows PowerShell（test_rag_chat.ps1 需要 UTF-8 BOM 已就绪）
@@ -20,6 +26,8 @@ node tests\loader_fetch_test.mjs
 node tests\avatar_sync_test.js      # 另需 CHROME_PATH（默认自动探测 Chrome/Edge）
 ```
 
+- `smoke_e2e.py` 覆盖的"英文朗读"一项，专门用于抓 NLTK `cmudict` 缺失导致的
+  `/v1/audio/speech` 500（见 DEPLOY.md 第 4 节第 5 步）。
 - `test_rag_chat.ps1` 前 4 项不依赖账号；第 5 项「登录+界面对话」在设置了
   `OWUI_EMAIL` / `OWUI_PASSWORD` 环境变量时才执行，否则 SKIP。
 - 日志写入 `tests\output\`（已 gitignore）。

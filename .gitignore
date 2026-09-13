@@ -149,6 +149,9 @@ shumeipai/
 !文字驱动语音/tts_service/models/README.md
 文字驱动语音/tts_service/tmp/
 
+# 冒烟测试产物（tests\smoke_e2e.py 输出）
+tests/_smoke_out/
+
 # 公网部署工作台 yumingbushu/（原兄弟仓库，已并入为子目录）——敏感/运行期文件一律不入库
 yumingbushu/cloudflared/
 yumingbushu/login_gateway/config.json

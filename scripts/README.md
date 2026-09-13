@@ -35,9 +35,11 @@ python scripts\inline_loader.py --venv <路径>    # 自定义虚拟环境
 | 脚本 | 作用 |
 |------|------|
 | `download_whisper.py` | 用 hf-mirror 国内镜像下载 faster-whisper-small 到 Open WebUI 语音识别缓存（需先 `pip install huggingface_hub`） |
+| `setup_nltk_data.py` | 补齐 GPT-SoVITS 英文 G2P 依赖的 NLTK 语料（`corpora/cmudict` + `taggers/averaged_perceptron_tagger_eng`）到 `runtime\py312\nltk_data`。**换机器必跑**，否则朗读含英文字母时 500 |
 
 ```bash
 python scripts\download_whisper.py
+runtime\py312\python.exe scripts\setup_nltk_data.py
 ```
 
 ## 备注

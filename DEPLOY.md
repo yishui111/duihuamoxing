@@ -132,6 +132,19 @@ cd gptsovits\GPT-SoVITS
    runtime\ffmpeg\bin\ffprobe.exe
    ```
 
+5. **补齐 NLTK 语料（必需，否则中英混排朗读报 500）**：
+
+   朗读文本里只要含英文字母（`AI`、`OK`、`Hello`、中英混排），GPT-SoVITS 的英文 G2P 会去读
+   `runtime\py312\nltk_data` 下的 `corpora\cmudict`，缺了就直接 `LookupError` → HTTP 500，
+   表现为"朗读用不了"；纯中文文本走不到该分支，所以容易出现 `/tts` 正常而 `/v1/audio/speech` 挂掉。
+   `runtime\` 不入库，**换机器必须重跑一次**：
+
+   ```bat
+   <你的仓库路径>\runtime\py312\python.exe scripts\setup_nltk_data.py
+   ```
+
+   脚本幂等：优先从本机 `%APPDATA%\nltk_data` 复制，其次联网下载，最后校验 `g2p_en` 可用。
+
 ---
 
 ## 5. 角色声音模型（训练音色，可选）
@@ -238,6 +251,7 @@ powershell -ExecutionPolicy Bypass -File .\tests\test_rag_chat.ps1
 - **Ollama 一直"就绪检测失败"**：多半是模型没拉到 `data\ollama\models`（见第 2 节）；或托盘 Ollama 占用 11434（禁用自启后重试）。
 - **Open WebUI 起不来**：看 `log\webui.err.log`；端口 8089 被占换端口（改 `启动.bat` 的 `--port`）。
 - **朗读自动变系统语音**：18060 未启动或 `tts_service\models\` 无完整角色（4 件套）；先看 `log\tts.err.log`。
+- **朗读含英文就报 500（`Resource 'cmudict' not found`）**：NLTK 语料缺失，跑 `runtime\py312\python.exe scripts\setup_nltk_data.py`（见第 4 节第 5 步）。
 - **数字人素材库为空**：素材需自己建库（第 6 节），仓库不含真人素材。
 - **首次对话/朗读慢**：模型冷加载（qwen 1~3 分钟、某音色首次 10~25 秒），属正常；启动脚本已自动预热默认音色。
 - **代理/杀软拦截**：本项目全本地端口，可加防火墙例外：8088/8089/11434/48620/18060。

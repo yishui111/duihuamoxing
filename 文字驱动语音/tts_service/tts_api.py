@@ -850,6 +850,69 @@ def openai_compat_models():
     return {"data": [{"id": n, "name": n} for n in sorted(ROLES) if ROLES[n]["ready"]]}
 
 
+# ---------------- NLTK 语料自愈（英文 G2P 依赖，换机器会丢） ----------------
+# 朗读文本含英文字母（AI/OK/Hello/中英混排）时，GPT-SoVITS 的 text/english.py 会走
+# g2p_en -> nltk cmudict；缺 corpora/cmudict 直接抛 LookupError 并返回 500。纯中文
+# 走不到该分支，所以表现为 /tts 正常而 /v1/audio/speech（Open WebUI 实际朗读通道）
+# 挂掉，极易误判为"朗读坏了"。runtime\ 不入库，这里在启动时从本机已有 nltk_data
+# 自愈补齐；补不上则打醒目日志指向 scripts\setup_nltk_data.py。
+_NLTK_NEEDED = (("corpora", "cmudict"), ("taggers", "averaged_perceptron_tagger_eng"))
+
+
+def _ensure_nltk_data():
+    try:
+        import nltk
+    except ImportError:
+        return
+    # 目标目录与 nltk 自身搜索路径一致：<sys.prefix>\nltk_data（即 runtime\py312\nltk_data）
+    local = os.path.join(sys.prefix, "nltk_data")
+    if local not in nltk.data.path:
+        nltk.data.path.insert(0, local)
+    home = os.path.expanduser("~")
+    # 候选来源：环境变量可能为空（如从某些 shell/服务方式启动），所以同时硬编码经典位置
+    sources = [
+        os.path.join(os.environ.get("APPDATA", "") or "", "nltk_data"),
+        os.path.join(os.environ.get("LOCALAPPDATA", "") or "", "nltk_data"),
+        os.path.join(home, "nltk_data"),
+        os.path.join(home, "AppData", "Roaming", "nltk_data"),
+    ] + [p for p in nltk.data.path if p and p != local]
+    missing = []
+    for subdir, name in _NLTK_NEEDED:
+        dst = os.path.join(local, subdir, name)
+        try:
+            if os.path.isdir(dst) and os.listdir(dst):
+                continue
+        except OSError:
+            pass
+        src = None
+        for root in sources:
+            cand = os.path.join(root, subdir, name)
+            try:
+                if os.path.isdir(cand) and os.listdir(cand):
+                    src = cand
+                    break
+            except OSError:
+                continue
+        if not src:
+            missing.append("%s/%s" % (subdir, name))
+            continue
+        try:
+            os.makedirs(os.path.dirname(dst), exist_ok=True)
+            shutil.copytree(src, dst, dirs_exist_ok=True)
+            logger.info("已补齐 NLTK 语料 %s/%s <- %s", subdir, name, src)
+        except Exception:  # noqa: BLE001
+            logger.exception("补齐 NLTK 语料失败: %s/%s", subdir, name)
+            missing.append("%s/%s" % (subdir, name))
+    if missing:
+        logger.warning(
+            "NLTK 语料缺失: %s —— 朗读含英文字母的文本会返回 500。"
+            "请运行: %s scripts\\setup_nltk_data.py", ", ".join(missing),
+            os.path.join(os.path.dirname(PROJECT_ROOT), "runtime", "py312", "python.exe"))
+
+
+_ensure_nltk_data()
+
+
 def _startup_warmup():
     """启动后后台预加载默认音色（TTS_DEFAULT_VOICE）到缓存，避免外部调用首次请求时
     模型尚未就绪。关键：**只加载缓存、绝不切换/设置默认角色**——用户切换了哪个角色
