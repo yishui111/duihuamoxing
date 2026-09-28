@@ -161,4 +161,5 @@ yumingbushu/backup/
 yumingbushu/diag_*.zip
 yumingbushu/diag_tmp/
 yumingbushu/_test_*.bat
-yumingbushu/_start_all*.log测试结果/
+yumingbushu/_start_all*.log
+测试结果/

@@ -1,1 +1,0 @@
-avatar-server: port=48620 libs=D:\xm\数字人项目\数字人\avatar_libs web=D:\xm\数字人项目\数字人\avatar_web

@@ -1,21 +1,0 @@
-D:\xm\数字人项目\runtime\py312\Lib\site-packages\jieba\_compat.py:18: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
-  import pkg_resources
-INFO:     默认参考音频路径: D:\xm\数字人项目\文字驱动语音\tts_service\models\ayaka\ref.wav
-INFO:     默认参考音频文本: 晚上好夜风舒畅会是一个良宵呢
-INFO:     默认参考音频语种: zh
-INFO:     半精: True
-INFO:     编码格式: wav
-INFO:     数据类型: int16
-INFO:     模型版本: v1
-INFO:     Started server process [36800]
-INFO:     Waiting for application startup.
-INFO:     Application startup complete.
-INFO:     Uvicorn running on http://0.0.0.0:18060 (Press CTRL+C to quit)
-2026-09-28 07:13:04,124 INFO zhixin_tts: 后台预热音色模型(仅加载缓存，不切换默认): azhong
-INFO:     模型版本: v1
-2026-09-28 07:13:04,996 INFO zhixin_tts: 音色预加载完成(仅缓存): azhong
-INFO:     127.0.0.1:12620 - "GET /health HTTP/1.1" 200 OK
-INFO:     127.0.0.1:12621 - "GET /health HTTP/1.1" 200 OK
-2026-09-28 07:14:10,232 INFO zhixin_tts: OpenAI兼容合成(11字) 角色=azhong: 知音系统语音服务测试。
-  0%|          | 0/1500 [00:00<?, ?it/s]  0%|          | 1/1500 [00:00<04:12,  5.93it/s]  0%|          | 7/1500 [00:00<00:50, 29.58it/s]  1%|          | 13/1500 [00:00<00:36, 40.38it/s]  2%|▏         | 23/1500 [00:00<00:24, 60.17it/s]  2%|▏         | 33/1500 [00:00<00:20, 73.04it/s]  3%|▎         | 44/1500 [00:00<00:17, 84.53it/s]  4%|▎         | 55/1500 [00:00<00:15, 91.96it/s]  4%|▍         | 65/1500 [00:00<00:19, 72.73it/s]
-INFO:     127.0.0.1:12826 - "POST /v1/audio/speech HTTP/1.1" 200 OK
