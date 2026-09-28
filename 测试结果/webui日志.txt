@@ -1,0 +1,29 @@
+INFO  [alembic.runtime.migration] Context impl SQLiteImpl.
+INFO  [alembic.runtime.migration] Will assume non-transactional DDL.
+WARNI [open_webui.env] 
+
+WARNING: CORS_ALLOW_ORIGIN IS SET TO '*' - NOT RECOMMENDED FOR PRODUCTION DEPLOYMENTS.
+
+WARNI [langchain_community.utils.user_agent] USER_AGENT environment variable not set, consider setting it to identify your requests.
+WARNI [open_webui.main] Frontend build directory not found at 'D:\xm\数字人项目\venv\Lib\build'. Serving API only.
+INFO:     Started server process [33832]
+INFO:     Waiting for application startup.
+
+ ██████╗ ██████╗ ███████╗███╗   ██╗    ██╗    ██╗███████╗██████╗ ██╗   ██╗██╗
+██╔═══██╗██╔══██╗██╔════╝████╗  ██║    ██║    ██║██╔════╝██╔══██╗██║   ██║██║
+██║   ██║██████╔╝█████╗  ██╔██╗ ██║    ██║ █╗ ██║█████╗  ██████╔╝██║   ██║██║
+██║   ██║██╔═══╝ ██╔══╝  ██║╚██╗██║    ██║███╗██║██╔══╝  ██╔══██╗██║   ██║██║
+╚██████╔╝██║     ███████╗██║ ╚████║    ╚███╔███╔╝███████╗██████╔╝╚██████╔╝██║
+ ╚═════╝ ╚═╝     ╚══════╝╚═╝  ╚═══╝     ╚══╝╚══╝ ╚══════╝╚═════╝  ╚═════╝ ╚═╝
+
+
+v0.0.0 - building the best AI user interface.
+
+https://github.com/open-webui/open-webui
+
+[32m2026-09-28 07:56:31.514[0m | [1mINFO    [0m | [36mopen_webui.utils.logger[0m:[36mstart_logger[0m:[36m218[0m - [1mGLOBAL_LOG_LEVEL: INFO[0m
+[32m2026-09-28 07:56:31.542[0m | [1mINFO    [0m | [36mopen_webui.main[0m:[36mlifespan[0m:[36m363[0m - [1mInstalling external dependencies of functions and tools...[0m
+[32m2026-09-28 07:56:31.572[0m | [1mINFO    [0m | [36mopen_webui.utils.plugin[0m:[36minstall_frontmatter_requirements[0m:[36m450[0m - [1mNo requirements found in frontmatter.[0m
+[32m2026-09-28 07:56:31.572[0m | [1mINFO    [0m | [36mopen_webui.utils.automations[0m:[36mscheduler_worker_loop[0m:[36m213[0m - [1mScheduler worker started (timer poll interval: 1s, scheduler poll interval: 10s)[0m
+[32m2026-09-28 07:56:36.702[0m | [1mINFO    [0m | [36muvicorn.protocols.http.httptools_impl[0m:[36msend[0m:[36m485[0m - [1m127.0.0.1:7077 - "GET /api/config HTTP/1.1" 200[0m
+[32m2026-09-28 07:56:58.909[0m | [1mINFO    [0m | [36muvicorn.protocols.http.httptools_impl[0m:[36msend[0m:[36m485[0m - [1m127.0.0.1:7142 - "GET / HTTP/1.1" 404[0m
